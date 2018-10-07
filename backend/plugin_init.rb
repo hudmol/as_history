@@ -1,3 +1,4 @@
+Repository.include(Auditable)
 Resource.include(Auditable)
 ArchivalObject.include(Auditable)
 DigitalObject.include(Auditable)
