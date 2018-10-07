@@ -41,28 +41,42 @@ class History < Sequel::Model(:history)
 
 
   def self.versions(model, id)
-    db[:history]
-      .filter(:model => model, :record_id => id)
-      .select(:lock_version)
-      .map { |history| uri(model, id, history[:lock_version]) }
+    History.new(model, id).versions
   end
 
 
   def self.version(model, id, version, opts = {})
-    version = db[:history]
-      .filter(:model => model, :record_id => id, :lock_version => version)
-      .select(:json).first
-    ASUtils.json_parse(version[:json])
+    History.new(model, id).version(version)
   end
 
 
   def self.version_at(model, id, time)
-    version = db[:history]
-      .filter(:model => model, :record_id => id)
-      .where{user_mtime < time}
-      .reverse(:lock_version)
-      .select(:json).first
-    ASUtils.json_parse(version[:json])
+    History.new(model, id).version_at(time)
   end
 
+
+  def initialize(model, id)
+    @model = model
+    @id = id
+    @ds = db[:history].filter(:model => @model, :record_id => @id)
+  end
+
+
+  def versions
+    @ds.select(:lock_version)
+       .map { |history| History.uri(@model, @id, history[:lock_version]) }
+  end
+
+
+  def version(version)
+    ASUtils.json_parse(@ds.filter(:lock_version => version)
+                          .select(:json).first[:json])
+  end
+
+
+  def version_at(time)
+    ASUtils.json_parse(@ds.where{user_mtime < time}
+                          .reverse(:lock_version)
+                          .select(:json).first[:json])
+  end
 end
