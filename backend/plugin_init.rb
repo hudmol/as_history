@@ -1,10 +1,15 @@
-Repository.include(Auditable)
-Resource.include(Auditable)
-ArchivalObject.include(Auditable)
-DigitalObject.include(Auditable)
-DigitalObjectComponent.include(Auditable)
-Accession.include(Auditable)
-AgentPerson.include(Auditable)
-AgentCorporateEntity.include(Auditable)
-AgentFamily.include(Auditable)
-AgentSoftware.include(Auditable)
+models_with_history =
+  [
+   Repository,
+   Resource,
+   ArchivalObject,
+   DigitalObject,
+   DigitalObjectComponent,
+   Accession,
+   AgentPerson,
+   AgentCorporateEntity,
+   AgentFamily,
+   AgentSoftware,
+  ]
+
+models_with_history.map {|model| model.prepend(Auditable) }
