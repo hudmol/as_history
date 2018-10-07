@@ -14,6 +14,7 @@ class History < Sequel::Model(:history)
                       :record_id => obj.id,
                       :model => obj.class.table_name.to_s,
                       :lock_version => obj.lock_version,
+                      :uri => json[:uri],
                       :created_by => obj.created_by,
                       :last_modified_by => obj.last_modified_by,
                       :create_time => obj.create_time,

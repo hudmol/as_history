@@ -6,6 +6,8 @@ Sequel.migration do
       String :model, :null => false
       Integer :lock_version, :null => false
 
+      String :uri, :null => false
+
       apply_mtime_columns
 
       MediumBlobField :json, :null => false
