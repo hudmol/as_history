@@ -65,4 +65,16 @@ class History < Sequel::Model(:history)
     end
   end
 
+
+  def self.version_at(model, id, time)
+    DB.open do |db|
+      version = db[:history]
+        .filter(:model => model, :record_id => id)
+        .where{user_mtime < time}
+        .reverse(:lock_version)
+        .select(:json).first
+      return ASUtils.json_parse(version[:json])
+    end
+  end
+
 end
