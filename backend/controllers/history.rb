@@ -24,7 +24,11 @@ class ArchivesSpaceService < Sinatra::Base
   .permissions([])
   .returns([200, "version"]) \
   do
-    json_response(History.version(params[:model], params[:id], params[:version]))
+    begin
+      json_response(History.version(params[:model], params[:id], params[:version]))
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 400)
+    end
   end
 
 
@@ -37,7 +41,11 @@ class ArchivesSpaceService < Sinatra::Base
   .permissions([])
   .returns([200, "version diff"]) \
   do
-    json_response(History.diff(params[:model], params[:id], params[:a], params[:b]))
+    begin
+      json_response(History.diff(params[:model], params[:id], params[:a], params[:b]))
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 400)
+    end
   end
 
 end

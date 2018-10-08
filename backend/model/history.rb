@@ -1,5 +1,7 @@
 class History < Sequel::Model(:history)
 
+  class VersionNotFound < StandardError; end
+
   def self.ensure_current_versions(objs, jsons)
     latest_versions = db[:history]
       .filter(:model => objs.first.class.table_name.to_s)
@@ -102,7 +104,7 @@ class History < Sequel::Model(:history)
   private
 
   def _find_version(ds)
-    ds.first || raise("Version not found!")
+    ds.first || raise(History::VersionNotFound.new)
   end
 
 end
