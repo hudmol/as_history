@@ -68,7 +68,7 @@ class History < Sequel::Model(:history)
 
 
   def self.version(model, id, version, opts = {})
-    History.new(model, id).version(version)
+    History.new(model, id).version(version, opts)
   end
 
 
@@ -100,27 +100,24 @@ class History < Sequel::Model(:history)
   end
 
 
-  def version(version)
-    ASUtils.json_parse(_find_version(@ds.filter(:lock_version => version))[:json])
+  def version(version, opts = {})
+    _version_json(@ds.filter(:lock_version => version), opts)
   end
 
 
   def version_at(time, opts = {})
-    version = _find_version(@ds.where{user_mtime < time}.reverse(:lock_version))
-    if opts[:history_uris]
-      ASUtils.json_parse(_with_history_uris_at(time, version[:json]))
-    else
-      ASUtils.json_parse(version[:json])
-    end
+    _version_json(@ds.where{user_mtime < time}.reverse(:lock_version), opts.merge({:time => time}))
   end
 
 
   def diff(a, b)
+    diffs = {:changes => {}, :adds => {}, :removes => {}}
+    return diffs if a == b
+
     from = [a,b].min
     to = [a,b].max
     from_json = version(from)
     to_json = version(to)
-    diffs = {:adds => {}, :removes => {}, :changes => {}}
 
     (to_json.keys - from_json.keys).each{|k| diffs[:adds][k] = to_json[k]}
     (from_json.keys - to_json.keys).each{|k| diffs[:removes][k] = from_json[k]}
@@ -140,5 +137,16 @@ class History < Sequel::Model(:history)
 
   def _with_history_uris_at(time, json)
     json.gsub(/\"((\/[^\/ \"]+)+)/) {|m| '"' + History.uri_for_uri_at(time, $1)}
+  end
+
+
+  def _version_json(ds, opts)
+    version = _find_version(ds)
+    if opts[:history_uris]
+      ASUtils.json_parse(_with_history_uris_at(opts[:time] || version[:user_mtime], version[:json]))
+    else
+      ASUtils.json_parse(version[:json])
+    end
+
   end
 end

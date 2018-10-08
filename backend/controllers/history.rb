@@ -31,12 +31,13 @@ class ArchivesSpaceService < Sinatra::Base
   .description("Get a version of the record")
   .params(["model", String, "The model"],
           ["id", Integer, "The ID"],
-          ["version", Integer, "The version"])
+          ["version", Integer, "The version"],
+          ["history_uris", BooleanParam, "Convert uris to historical equivalents", :default => false])
   .permissions([])
   .returns([200, "version"]) \
   do
     begin
-      json_response(History.version(params[:model], params[:id], params[:version]))
+      json_response(History.version(params[:model], params[:id], params[:version], :history_uris => params[:history_uris]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 400)
     end
