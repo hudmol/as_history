@@ -69,14 +69,19 @@ class History < Sequel::Model(:history)
 
 
   def version(version)
-    ASUtils.json_parse(@ds.filter(:lock_version => version)
-                          .select(:json).first[:json])
+    ASUtils.json_parse(_find_version(@ds.filter(:lock_version => version))[:json])
   end
 
 
   def version_at(time)
-    ASUtils.json_parse(@ds.where{user_mtime < time}
-                          .reverse(:lock_version)
-                          .select(:json).first[:json])
+    ASUtils.json_parse(_find_version(@ds.where{user_mtime < time}.reverse(:lock_version))[:json])
   end
+
+
+  private
+
+  def _find_version(ds)
+    ds.first || raise("No version found!")
+  end
+
 end
