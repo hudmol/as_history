@@ -1,5 +1,19 @@
 class History < Sequel::Model(:history)
 
+  @@fields = [
+              :record_id,
+              :model,
+              :lock_version,
+              :uri,
+              :created_by,
+              :last_modified_by,
+              :create_time,
+              :system_mtime,
+              :user_mtime,
+              :json,
+              ]
+
+
   class VersionNotFound < StandardError; end
 
   def self.ensure_current_versions(objs, jsons)
@@ -42,6 +56,12 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self.uri_for_uri_at(time, uri)
+    version = db[:history].filter(:uri => uri).where{user_mtime < time}.reverse(:user_mtime).first
+    version ? uri(version[:model], version[:record_id], version[:lock_version]) : uri
+  end
+
+
   def self.versions(model, id)
     History.new(model, id).versions
   end
@@ -52,13 +72,18 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.version_at(model, id, time)
-    History.new(model, id).version_at(time)
+  def self.version_at(model, id, time, opts = {})
+    History.new(model, id).version_at(time, opts)
   end
 
 
   def self.diff(model, id, a, b)
     History.new(model, id).diff(a, b)
+  end
+
+
+  def self.recent(limit = 10)
+    db[:history].reverse(:user_mtime).select(*@@fields.reject{|f| f == :json}).limit(limit).all
   end
 
 
@@ -80,8 +105,13 @@ class History < Sequel::Model(:history)
   end
 
 
-  def version_at(time)
-    ASUtils.json_parse(_find_version(@ds.where{user_mtime < time}.reverse(:lock_version))[:json])
+  def version_at(time, opts = {})
+    version = _find_version(@ds.where{user_mtime < time}.reverse(:lock_version))
+    if opts[:history_uris]
+      ASUtils.json_parse(_with_history_uris_at(time, version[:json]))
+    else
+      ASUtils.json_parse(version[:json])
+    end
   end
 
 
@@ -107,4 +137,8 @@ class History < Sequel::Model(:history)
     ds.first || raise(History::VersionNotFound.new)
   end
 
+
+  def _with_history_uris_at(time, json)
+    json.gsub(/\"((\/[^\/ \"]+)+)/) {|m| '"' + History.uri_for_uri_at(time, $1)}
+  end
 end
