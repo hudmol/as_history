@@ -55,6 +55,11 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self.diff(model, id, a, b)
+    History.new(model, id).diff(a, b)
+  end
+
+
   def initialize(model, id)
     @model = model
     @id = id
@@ -78,10 +83,26 @@ class History < Sequel::Model(:history)
   end
 
 
+  def diff(a, b)
+    from = [a,b].min
+    to = [a,b].max
+    from_json = version(from)
+    to_json = version(to)
+    diffs = {:adds => {}, :removes => {}, :changes => {}}
+
+    (to_json.keys - from_json.keys).each{|k| diffs[:adds][k] = to_json[k]}
+    (from_json.keys - to_json.keys).each{|k| diffs[:removes][k] = from_json[k]}
+    (to_json.keys & from_json.keys).each{|k| diffs[:changes][k] =
+      {:from => from_json[k], :to => to_json[k]} if from_json[k] != to_json[k]}
+
+    diffs    
+  end
+
+
   private
 
   def _find_version(ds)
-    ds.first || raise("No version found!")
+    ds.first || raise("Version not found!")
   end
 
 end

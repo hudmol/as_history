@@ -17,7 +17,7 @@ class ArchivesSpaceService < Sinatra::Base
 
 
   Endpoint.get('/history/:model/:id/:version')
-  .description("Get version history for the record")
+  .description("Get a version of the record")
   .params(["model", String, "The model"],
           ["id", Integer, "The ID"],
           ["version", Integer, "The version"])
@@ -25,6 +25,19 @@ class ArchivesSpaceService < Sinatra::Base
   .returns([200, "version"]) \
   do
     json_response(History.version(params[:model], params[:id], params[:version]))
+  end
+
+
+  Endpoint.get('/history/:model/:id/:a/:b')
+  .description("Get a diff between versions of the record")
+  .params(["model", String, "The model"],
+          ["id", Integer, "The ID"],
+          ["a", Integer, "The 'a' version"],
+          ["b", Integer, "The 'b' version"])
+  .permissions([])
+  .returns([200, "version diff"]) \
+  do
+    json_response(History.diff(params[:model], params[:id], params[:a], params[:b]))
   end
 
 end
