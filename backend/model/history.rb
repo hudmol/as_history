@@ -111,18 +111,37 @@ class History < Sequel::Model(:history)
 
 
   def diff(a, b)
-    diffs = {:changes => {}, :adds => {}, :removes => {}}
+    diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
     return diffs if a == b
 
-    from = [a,b].min
-    to = [a,b].max
-    from_json = version(from)
-    to_json = version(to)
+    from_json = version([a,b].min)
+    to_json = version([a,b].max)
 
-    (to_json.keys - from_json.keys).each{|k| diffs[:adds][k] = to_json[k]}
-    (from_json.keys - to_json.keys).each{|k| diffs[:removes][k] = from_json[k]}
-    (to_json.keys & from_json.keys).each{|k| diffs[:changes][k] =
-      {:from => from_json[k], :to => to_json[k]} if from_json[k] != to_json[k]}
+    (to_json.keys - from_json.keys).each{|k| diffs[:_adds][k] = to_json[k]}
+    (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
+
+    (to_json.keys & from_json.keys).each do |k|
+      next if from_json[k] == to_json[k]
+
+      if from_json[k].is_a? Array
+        ca = []
+        fa = from_json[k] + (Array.new([to_json[k].length - from_json[k].length, 0].max))
+        fa.zip(to_json[k]) do |f, t|
+          if f && t
+            hd = _nested_hash_diff(f,t)
+            ca.push(hd) unless hd.empty?
+          else
+            ca.push({:_from => f, :_to => t})
+          end
+        end
+        diffs[:_changes][k] = ca unless ca.empty?
+      elsif to_json[k].is_a? Hash
+        hd = _nested_hash_diff(from_json[k], to_json[k])
+        diffs[:_changes][k] = hd unless hd.empty?
+      else
+        diffs[:_changes][k] = {:_from => from_json[k], :_to => to_json[k]}
+      end
+    end
 
     diffs    
   end
@@ -147,6 +166,18 @@ class History < Sequel::Model(:history)
     else
       ASUtils.json_parse(version[:json])
     end
-
   end
+
+
+  def _nested_hash_diff(from, to)
+    out = {}
+    (from.keys | to.keys).each do |k|
+      # ignore audit fields on nested hashes
+      next if ['created_by', 'last_modified_by', 'create_time', 'system_mtime', 'user_mtime'].include?(k)
+      next if from[k] == to[k]
+      out[k] = {:_from => from[k], :_to => to[k]}
+    end
+    out
+  end
+
 end
