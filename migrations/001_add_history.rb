@@ -6,7 +6,7 @@ Sequel.migration do
       String :model, :null => false
       Integer :lock_version, :null => false
 
-      String :uri, :null => false
+      String :uri, :null => false, :index => true
 
       apply_mtime_columns
 
