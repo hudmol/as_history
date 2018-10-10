@@ -1,0 +1,20 @@
+<h3>History</h3>
+<div>
+  <h4>Recent versions</h4>
+  <table class="history">
+    <tr>
+      <th>URI</th>
+      <th>Version</th>
+      <th>By</th>
+      <th>At</th>
+    </tr>
+    <% @recent.each do |version| %>
+      <tr>
+        <td><%= version['uri'] %></td>
+        <td><%= version['lock_version'] %></td>
+        <td><%= version['last_modified_by'] %></td>
+        <td><%= version['user_mtime'] %></td>
+      <tr>
+    <% end %>
+  </table>
+</div>

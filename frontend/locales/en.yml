@@ -1,0 +1,5 @@
+en:
+  plugins:
+    history:
+      label: System History
+      button_label: Record History
