@@ -1,3 +1,5 @@
+require 'zlib'
+
 class History < Sequel::Model(:history)
 
   @@fields = [
@@ -36,7 +38,7 @@ class History < Sequel::Model(:history)
                       :create_time => obj.create_time,
                       :system_mtime => obj.system_mtime,
                       :user_mtime => obj.user_mtime,
-                      :json => ASUtils.to_json(json),
+                      :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json))),
                       )
         rescue Sequel::UniqueConstraintViolation
           # Someone beat us to it. No worries!
@@ -161,10 +163,11 @@ class History < Sequel::Model(:history)
 
   def _version_json(ds, opts)
     version = _find_version(ds)
+    json = Zlib::Inflate.inflate(Sequel::SQL::Blob.new(version[:json]))
     if opts[:history_uris]
-      ASUtils.json_parse(_with_history_uris_at(opts[:time] || version[:user_mtime], version[:json]))
+      ASUtils.json_parse(_with_history_uris_at(opts[:time] || version[:user_mtime], json))
     else
-      ASUtils.json_parse(version[:json])
+      ASUtils.json_parse(json)
     end
   end
 
