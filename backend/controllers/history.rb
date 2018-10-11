@@ -54,6 +54,27 @@ class ArchivesSpaceService < Sinatra::Base
   end
 
 
+  Endpoint.post('/history/:model/:id/:version/restore')
+  .description("Restore a version of the record")
+  .params(["model", String, "The model"],
+          ["id", Integer, "The ID"],
+          ["version", Integer, "The version to restore"])
+  .permissions([])
+  .returns([200, "version"]) \
+  do
+    begin
+      record_model = ASModel.all_models.select {|m| m.table_name == params[:model].intern}.first
+      obj = record_model.get_or_die(params[:id])
+      json = JSONModel(params[:model].intern).from_hash(get_version(params[:model], params[:id], params[:version], 'json', false))
+      json.lock_version = get_version(params[:model], params[:id], Time.now, 'data', false).values.first[:lock_version]
+      obj.update_from_json(json)
+      updated_response(obj, json)
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 400)
+    end
+  end
+
+
   Endpoint.get('/history/:model/:id/:a/:b')
   .description("Get a diff between versions of the record")
   .params(["model", String, "The model"],
