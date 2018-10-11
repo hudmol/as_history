@@ -1,0 +1,22 @@
+<% @version['json'].each do |k,v| %>
+  <% cls = '' %>
+  <% if @version['diff'] %>
+    <% cls = 'history-add' if @version['diff']['_adds'].has_key?(k) %>
+    <% cls = 'history-remove' if @version['diff']['_removes'].has_key?(k) %>
+    <% cls = 'history-change' if @version['diff']['_changes'].has_key?(k) %>
+  <% end %>
+
+
+  <% unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) %>
+  <div class="history-field <%= cls %>">
+    <%= t(@version['data'].values.first['model'] + '.' + k) %>:
+    <% if v.is_a?(String) && v.start_with?('/history/') %>
+      <%= link_to v, v %>
+    <% elsif v.is_a?(Hash) && v.has_key?('ref') && v['ref'].start_with?('/history') %>
+      <%= link_to v['ref'], v['ref'] %>
+    <% else %>
+      <%= v %>
+    <% end %>
+  </div>
+  <% end %>
+<% end %>

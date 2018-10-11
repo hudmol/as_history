@@ -1,1 +1,25 @@
-<%= @version.inspect %>
+<% link_hash = {:controller => model_pl} %>
+<% link_hash[:agent_type] = data['model'] if model_pl == 'agents' %>
+<% breadcrumb_trail = [[model_pl.capitalize, link_hash.merge({:action => :index})],
+                       [json['name'] || json['display_string'] || json['title'], link_hash.merge({:action => :show, :id => data['record_id']})],
+                       [t('plugins.history.button_label')]] %>
+
+<%= render_aspace_partial(:partial =>"shared/breadcrumb", :layout => false , :locals => { :trail => breadcrumb_trail }).to_s %>
+
+<div class="row">
+
+  <div class="col-md-3">
+    <%= render_aspace_partial :partial => "history/sidebar" %>
+  </div>
+
+  <div class="col-md-9">
+
+    <%= render_aspace_partial :partial => "history/toolbar" %>
+
+    <div class="record-pane">
+      <%= render_aspace_partial :partial => "history/record" %>
+    </div>
+
+  </div>
+
+</div>

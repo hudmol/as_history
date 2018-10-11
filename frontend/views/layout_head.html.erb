@@ -1,21 +1,25 @@
+<%= stylesheet_link_tag "#{AppConfig[:frontend_prefix]}assets/history.css" %>
+
 <%
   history_uri = false
-  [
-   @repository,
-   @resource,
-   @archival_object,
-   @digital_object,
-   @digital_object_component,
-   @accession,
-   @agent
-  ].each do |obj|
-    if obj
-      if obj.respond_to?(:history)
-        history_uri = obj.history['ref']
-        break
-      elsif obj.respond_to?(:repository) && obj.repository.has_key?('history')
-        history_uri = obj.repository['history']['ref']
-        break
+  unless action_name == 'new'
+    [
+     @repository,
+     @resource,
+     @archival_object,
+     @digital_object,
+     @digital_object_component,
+     @accession,
+     @agent
+    ].each do |obj|
+      if obj
+        if obj.respond_to?(:history)
+          history_uri = obj.history['ref']
+          break
+        elsif obj.respond_to?(:repository) && obj.repository.has_key?('history')
+          history_uri = obj.repository['history']['ref']
+          break
+        end
       end
     end
   end

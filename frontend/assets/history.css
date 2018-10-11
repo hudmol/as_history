@@ -1,0 +1,23 @@
+.history-version {
+  width: 100%;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  margin: 4px;
+  padding: 4px;
+}
+
+.history-add {
+  color: green;
+}
+
+.history-remove {
+  color: red;
+}
+
+.history-change {
+  color: blue;
+}
+
+.history-showing-version {
+  background: #aaccff;
+}
