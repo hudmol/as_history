@@ -21,3 +21,11 @@
 .history-showing-version {
   background: #aaccff;
 }
+
+.history-subrecord {
+  margin: 2px 8px 6px 30px;
+}
+
+.history-field-label {
+  color: #777;
+}

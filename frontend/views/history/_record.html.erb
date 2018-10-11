@@ -1,4 +1,4 @@
-<% @version['json'].each do |k,v| %>
+<% json.each do |k,v| %>
   <% cls = '' %>
   <% if @version['diff'] %>
     <% cls = 'history-add' if @version['diff']['_adds'].has_key?(k) %>
@@ -9,11 +9,23 @@
 
   <% unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) %>
   <div class="history-field <%= cls %>">
-    <%= t(@version['data'].values.first['model'] + '.' + k) %>:
+    <span class="history-field-label">
+      <%= t(data['model'] + '.' + k) %>:
+    </span>
     <% if v.is_a?(String) && v.start_with?('/history/') %>
       <%= link_to v, v %>
     <% elsif v.is_a?(Hash) && v.has_key?('ref') && v['ref'].start_with?('/history') %>
       <%= link_to v['ref'], v['ref'] %>
+    <% elsif v.is_a?(Hash) %>
+      <div class="history-subrecord">
+      <%= render_aspace_partial :partial => "history/record", :locals => {:json => v} %>
+      </div>
+    <% elsif v.is_a?(Array) %>
+      <div class="history-subrecord">
+      <% v.each do |r| %>
+        <%= render_aspace_partial :partial => "history/record", :locals => {:json => r} %>
+      <% end %>
+      </div>
     <% else %>
       <%= v %>
     <% end %>

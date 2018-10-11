@@ -20,7 +20,19 @@ class HistoryController < ApplicationController
 
   helper_method :skip_fields
   def skip_fields
-    ['lock_version', 'created_by', 'last_modified_by', 'create_time', 'system_mtime', 'user_mtime', 'jsonmodel_type', 'uri', 'history']
+    [
+     'lock_version',
+     'created_by',
+     'last_modified_by',
+     'create_time',
+     'system_mtime',
+     'user_mtime',
+     'jsonmodel_type',
+     'uri',
+     'history',
+     'agent_type',
+     'tree',
+    ]
   end
 
   helper_method :time_display
