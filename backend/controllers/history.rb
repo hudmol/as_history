@@ -24,7 +24,11 @@ class ArchivesSpaceService < Sinatra::Base
       if params[:at]
         json_response(get_version(params[:model], params[:id], params[:at], params[:mode], params[:uris]))
       else
-        json_response(History.versions(params[:model], params[:id]))
+        if params[:mode].start_with?('f')
+          json_response(get_version(params[:model], params[:id], Time.now, params[:mode], params[:uris]))
+        else
+          json_response(History.versions(params[:model], params[:id]))
+        end
       end
     rescue History::VersionNotFound => e
       json_response({:error => e}, 400)
@@ -67,14 +71,14 @@ class ArchivesSpaceService < Sinatra::Base
   end
 
 
-  def get_version(model, id, version, mode, uris)
+  def get_version(model, id, version_or_time, mode, uris)
     history = History.new(model, id)
-    version = history.version(version)
+    version = history.version(version_or_time)
     if mode.start_with?('f')
       {
         :json => version.json(uris),
         :data => version.data,
-        :diff => (history.diff(version, version - 1) rescue History::VersionNotFound && nil),
+        :diff => (history.diff(version.time, version.time - 1) rescue History::VersionNotFound && nil),
         :versions => history.versions,
       }
     elsif mode.start_with?('d')

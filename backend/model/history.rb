@@ -130,6 +130,10 @@ class History < Sequel::Model(:history)
     end
 
 
+    def time
+      @data[:user_mtime]
+    end
+
     def json(convert_uris = true)
       ASUtils.json_parse(convert_uris ? _convert_uris(_inflated_json) : _inflated_json)
     end
