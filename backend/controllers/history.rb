@@ -2,11 +2,11 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history')
   .description("Get recently created versions")
-  .params(["limit", Integer, "How many to show (default 10)", :optional => true])
+  .params(["limit", Integer, "How many to show (default 10)", :default => 10])
   .permissions([])
   .returns([200, "versions"]) \
   do
-    json_response(History.recent(params[:limit] || 10))
+    json_response(History.recent(params[:limit]))
   end
 
 
@@ -15,14 +15,19 @@ class ArchivesSpaceService < Sinatra::Base
   .params(["model", String, "The model"],
           ["id", Integer, "The ID"],
           ["at", String, "Return the version current at the specified date/time", :optional => true],
-          ["history_uris", BooleanParam, "Convert uris to historical equivalents", :default => false])
+          ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
+          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
   .permissions([])
   .returns([200, "history"]) \
   do
-    if params[:at]
-      json_response(History.version_at(params[:model], params[:id], params[:at], :history_uris => params[:history_uris]))
-    else
-      json_response(History.versions(params[:model], params[:id]))
+    begin
+      if params[:at]
+        json_response(get_version(params[:model], params[:id], params[:at], params[:mode], params[:uris]))
+      else
+        json_response(History.versions(params[:model], params[:id]))
+      end
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 400)
     end
   end
 
@@ -32,12 +37,13 @@ class ArchivesSpaceService < Sinatra::Base
   .params(["model", String, "The model"],
           ["id", Integer, "The ID"],
           ["version", Integer, "The version"],
-          ["history_uris", BooleanParam, "Convert uris to historical equivalents", :default => false])
+          ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
+          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
   .permissions([])
   .returns([200, "version"]) \
   do
     begin
-      json_response(History.version(params[:model], params[:id], params[:version], :history_uris => params[:history_uris]))
+      json_response(get_version(params[:model], params[:id], params[:version], params[:mode], params[:uris]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 400)
     end
@@ -60,4 +66,21 @@ class ArchivesSpaceService < Sinatra::Base
     end
   end
 
+
+  def get_version(model, id, version, mode, uris)
+    history = History.new(model, id)
+    version = history.version(version)
+    if mode.start_with?('f')
+      {
+        :json => version.json(uris),
+        :data => version.data,
+        :diff => (history.diff(version, version - 1) rescue History::VersionNotFound && nil),
+        :versions => history.versions,
+      }
+    elsif mode.start_with?('d')
+      version.data
+    else
+      version.json(params[:uris])
+    end
+  end
 end

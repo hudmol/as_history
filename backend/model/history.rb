@@ -2,19 +2,32 @@ require 'zlib'
 
 class History < Sequel::Model(:history)
 
-  @@fields = [
-              :record_id,
-              :model,
-              :lock_version,
-              :uri,
-              :created_by,
-              :last_modified_by,
-              :create_time,
-              :system_mtime,
-              :user_mtime,
-              :json,
-              ]
+  def self.fields
+    [
+     :record_id,
+     :model,
+     :lock_version,
+     :uri,
+     :created_by,
+     :last_modified_by,
+     :create_time,
+     :system_mtime,
+     :user_mtime,
+     :json,
+    ]
+  end
 
+  def self.audit_fields
+    [
+     :lock_version,
+     :created_by,
+     :last_modified_by,
+     :create_time,
+     :system_mtime,
+     :user_mtime,
+    ]
+
+  end
 
   class VersionNotFound < StandardError; end
 
@@ -59,7 +72,7 @@ class History < Sequel::Model(:history)
 
 
   def self.uri_for_uri_at(time, uri)
-    version = db[:history].filter(:uri => uri).where{user_mtime < time}.reverse(:user_mtime).first
+    version = db[:history].filter(:uri => uri).where{user_mtime <= time}.reverse(:user_mtime).first
     version ? uri(version[:model], version[:record_id], version[:lock_version]) : uri
   end
 
@@ -85,9 +98,67 @@ class History < Sequel::Model(:history)
 
 
   def self.recent(limit = 10)
-    db[:history].reverse(:user_mtime).select(*@@fields.reject{|f| f == :json}).limit(limit).all
+    db[:history].reverse(:user_mtime).select(*fields.reject{|f| f == :json}).limit(limit).all
   end
 
+
+  ###
+
+  class Version
+
+    def self.list_for(history)
+      Hash[history.ds.reverse(:lock_version)
+             .select(*History.fields.reject{|f| f == :json}).all
+             .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), r]}]
+    end
+
+
+    def initialize(history, version)
+      @history = history
+      if version.to_i.to_s == version.to_s
+        @version = version
+        @data = _version_or_die(@history.ds.filter(:lock_version => version))
+      else
+        @time = version
+        @data = _version_or_die(@history.ds.where{user_mtime <= version}.reverse(:lock_version))
+      end
+    end
+
+
+    def data
+      {History.uri(@data[:model], @data[:record_id], @data[:lock_version]) => @data.reject{|f| f == :json}}
+    end
+
+
+    def json(convert_uris = true)
+      ASUtils.json_parse(convert_uris ? _convert_uris(_inflated_json) : _inflated_json)
+    end
+
+
+    private
+
+    def _version_or_die(ds)
+      ds.first || raise(History::VersionNotFound.new)
+    end
+
+
+    def _inflated_json
+      Zlib::Inflate.inflate(Sequel::SQL::Blob.new(@data[:json]))
+    end
+
+
+    def _convert_uris(json)
+      time = @time || @data[:user_mtime]
+      json.gsub(/\"((\/[^\/ \"]+)+)/) {|m| '"' + History.uri_for_uri_at(time, $1)}
+    end
+
+  end
+
+
+  ###
+
+
+  attr_reader :ds
 
   def initialize(model, id)
     @model = model
@@ -97,18 +168,12 @@ class History < Sequel::Model(:history)
 
 
   def versions
-    @ds.select(:lock_version)
-       .map { |history| History.uri(@model, @id, history[:lock_version]) }
+    Version.list_for(self)
   end
 
 
-  def version(version, opts = {})
-    _version_json(@ds.filter(:lock_version => version), opts)
-  end
-
-
-  def version_at(time, opts = {})
-    _version_json(@ds.where{user_mtime < time}.reverse(:lock_version), opts.merge({:time => time}))
+  def version(version)
+    Version.new(self, version)
   end
 
 
@@ -116,13 +181,14 @@ class History < Sequel::Model(:history)
     diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
     return diffs if a == b
 
-    from_json = version([a,b].min)
-    to_json = version([a,b].max)
+    from_json = version([a,b].min).json(false)
+    to_json = version([a,b].max).json(false)
 
     (to_json.keys - from_json.keys).each{|k| diffs[:_adds][k] = to_json[k]}
     (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
 
     (to_json.keys & from_json.keys).each do |k|
+      next if History.audit_fields.include?(k.intern)
       next if from_json[k] == to_json[k]
 
       if from_json[k].is_a? Array
@@ -151,32 +217,10 @@ class History < Sequel::Model(:history)
 
   private
 
-  def _find_version(ds)
-    ds.first || raise(History::VersionNotFound.new)
-  end
-
-
-  def _with_history_uris_at(time, json)
-    json.gsub(/\"((\/[^\/ \"]+)+)/) {|m| '"' + History.uri_for_uri_at(time, $1)}
-  end
-
-
-  def _version_json(ds, opts)
-    version = _find_version(ds)
-    json = Zlib::Inflate.inflate(Sequel::SQL::Blob.new(version[:json]))
-    if opts[:history_uris]
-      ASUtils.json_parse(_with_history_uris_at(opts[:time] || version[:user_mtime], json))
-    else
-      ASUtils.json_parse(json)
-    end
-  end
-
-
   def _nested_hash_diff(from, to)
     out = {}
     (from.keys | to.keys).each do |k|
-      # ignore audit fields on nested hashes
-      next if ['created_by', 'last_modified_by', 'create_time', 'system_mtime', 'user_mtime'].include?(k)
+      next if History.audit_fields.include?(k.intern)
       next if from[k] == to[k]
       out[k] = {:_from => from[k], :_to => to[k]}
     end
