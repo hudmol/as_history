@@ -2,4 +2,4 @@ en:
   plugins:
     history:
       label: System History
-      button_label: Record History
+      button_label: Revision History
