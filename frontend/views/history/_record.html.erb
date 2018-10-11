@@ -10,7 +10,7 @@
   <% unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) %>
   <div class="history-field <%= cls %>">
     <span class="history-field-label">
-      <%= t(data['model'] + '.' + k) %>:
+      <%= lab = t(data['model'] + '.' + k); lab.is_a?(Hash) ? (lab[:_plural] || k) : lab %>:
     </span>
     <% if v.is_a?(String) && v.start_with?('/history/') %>
       <%= link_to v, v %>
