@@ -34,9 +34,26 @@
     });
     // for the other record types - sigh
     $(function() {
-    if (!$('#as-history-button').length) {
+      if (!$('#as-history-button').length) {
         $('#archivesSpaceSidebar').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
-    }
+      }
+
+      <% if history_uri.start_with?('/history/resource/') %>
+        monitorTreeChanges();
+      <% end %>
     });
+
+    // HELPME: there must be a better way!
+    function monitorTreeChanges() {
+      var id = $('.largetree-node.current').attr('id');
+      if (typeof id !== 'undefined') {
+        var uri = '/history/' + id.replace(/_(\d+)$/, '/$1');
+        var but = $('#as-history-button');
+        if (but.attr('href') !== uri) {
+          but.attr('href', uri);
+        }
+      }
+      setTimeout(function() { monitorTreeChanges() }, 1000);
+    }
   </script>
 <% end %>
