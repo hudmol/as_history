@@ -1,3 +1,9 @@
+<% if json.is_a?(String) %>
+
+  <%= json %>
+
+<% else %>
+
 <% json.each do |k,v| %>
   <% cls = '' %>
   <% if @version['diff'] %>
@@ -21,14 +27,16 @@
       <%= render_aspace_partial :partial => "history/record", :locals => {:json => v} %>
       </div>
     <% elsif v.is_a?(Array) %>
-      <div class="history-subrecord">
       <% v.each do |r| %>
-        <%= render_aspace_partial :partial => "history/record", :locals => {:json => r} %>
+        <div class="history-subrecord">
+          <%= render_aspace_partial :partial => "history/record", :locals => {:json => r} %>
+        </div>
       <% end %>
-      </div>
     <% else %>
       <%= v %>
     <% end %>
   </div>
   <% end %>
+<% end %>
+
 <% end %>
