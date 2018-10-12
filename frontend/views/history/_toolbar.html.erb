@@ -1,3 +1,98 @@
-<% fields = ['model', 'record_id', 'lock_version', 'last_modified_by', 'user_mtime'] %>
-<% data = @version['data'].values.first %>
-<%= fields.map{|f| f == 'user_mtime' ? time_display(data[f]) : data[f] }.join(' | ') %>
+<div class="as-history-toolbar">
+<div class="btn-group">
+  <a id="as-history-tb-record-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-doc"></span>
+    <%= data['model'] %> / <%= data['record_id'] %>  .v<%= data['lock_version'] %>
+  </a>
+
+  <a id="as-history-tb-user-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-page"></span>
+    <%= data['last_modified_by'] %>
+  </a>
+
+  <a id="as-history-tb-version-time-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-clock"></span>
+    <%= time_display(data['user_mtime']) %>
+  </a>
+</div>
+
+<div class="btn-group">
+  <a id="as-history-tb-diff-only-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-doc"></span>
+    =
+  </a>
+  <a id="as-history-tb-diff-all-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-doc"></span>
+    =
+  </a>
+  <a id="as-history-tb-diff-rec-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-doc"></span>
+    =
+  </a>
+</div>
+
+<div class="btn-group">
+  <a id="as-history-tb-latch-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-clock"></span>
+    Latch
+  </a>
+
+  <a id="as-history-tb-latch-target-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    href="<%=  %>">
+    <span class="glyphicon glyphicon-clock"></span>
+    Version
+  </a>
+</div>
+
+<a id="as-history-tb-diff-range-button"
+  class="btn btn-default as-history-tb-button"
+  style="color:#337ab7;margin-top:16px;"
+  href="<%=  %>">
+  <span class="glyphicon glyphicon-clock"></span>
+  Diff range
+</a>
+
+<a id="as-history-tb-restore-button"
+  class="btn btn-default as-history-tb-button"
+  style="color:#337ab7;margin-top:16px;"
+  href="<%=  %>">
+  <span class="glyphicon glyphicon-clock"></span>
+  Restore
+</a>
+
+<a id="as-history-tb-exit-button"
+  class="btn btn-default pull-right as-history-tb-button"
+  style="color:#337ab7;margin-top:16px;"
+  href="<%=  %>">
+  <span class="glyphicon glyphicon-clock"></span>
+  X
+</a>
+</div>
+
+
+
+
+
