@@ -29,3 +29,7 @@
 .history-field-label {
   color: #777;
 }
+
+.as-history-main-pane {
+  margin-top: -13px;
+}
