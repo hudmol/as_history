@@ -6,7 +6,7 @@
 
     ASHistory.prototype.updateDiffButtons = function(on_button) {
 	$('.as-history-tb-diff-button-group').children('a').css('background', 'initial');
-        $('#' + on_button).css('background', '#eee');
+        $('#' + on_button).css('background', '#ddd');
     };
 
     ASHistory.prototype.setDiffMode = function(mode) {
