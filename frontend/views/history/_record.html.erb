@@ -4,10 +4,10 @@
     if diff.is_a?(Hash)
       if diff.has_key?('_adds') # top level diff
         if diff['_adds'].has_key?(k)
-          sct = [{:class => 'history-change history-add', :value => val, :diff => diff['_adds'][k]}]
+          sct = [{:class => 'history-change history-add', :value => val, :diff => {'_to' => diff['_adds'][k], '_from' => nil}}]
           sct.push({:class => 'history-diff-field', :value => val})
         elsif diff['_removes'].has_key?(k)
-          sct = [{:class => 'history-change history-remove', :value => val, :diff => diff['_removes'][k]}]
+          sct = [{:class => 'history-change history-remove', :value => val, :diff => {'_to' => nil, '_from' => diff['_removes'][k]}}]
           sct.push({:class => 'history-diff-field', :value => val})
         elsif diff['_changes'].has_key?(k)
           if diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].keys - skip_fields != []
@@ -34,7 +34,7 @@
 
       sct.each do |h|
         v = h[:value]
-        unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k)
+        unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) || (k == 'repository' && !top)
 %>
           <div class="history-field <%= h[:class] %>">
             <span class="history-field-label">
@@ -53,7 +53,7 @@
           elsif v.is_a?(Hash)
 %>
             <div class="history-subrecord">
-              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff]} %>
+              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff], :top => false} %>
             </div>
 <%
           elsif v.is_a?(Array)
@@ -65,7 +65,7 @@
             else
 %>
               <div class="history-subrecord">
-                <%= render_aspace_partial :partial => "history/record", :locals => {:json => r, :diff => d} %>
+                <%= render_aspace_partial :partial => "history/record", :locals => {:json => r, :diff => d, :top => false} %>
               </div>
 <%
             end

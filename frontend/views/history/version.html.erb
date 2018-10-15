@@ -25,7 +25,7 @@
     <%= render_aspace_partial :partial => "history/toolbar" %>
 
     <div class="record-pane">
-      <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff']} %>
+      <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
     </div>
 
   </div>
