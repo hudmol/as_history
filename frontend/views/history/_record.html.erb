@@ -72,7 +72,7 @@
           end
         else
 %>
-          <%= v %>
+          <%=  t("enumerations.#{json['jsonmodel_type']}_#{k}.#{v.to_s}", :default => v.to_s) %>
 <%
         end
 %>
