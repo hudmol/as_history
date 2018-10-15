@@ -2,11 +2,18 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history')
   .description("Get recently created versions")
-  .params(["limit", Integer, "How many to show (default 10)", :default => 10])
+  .params(["user", String, "Only show recent versions by user", :optional => true],
+          ["limit", Integer, "How many to show", :default => 10],
+          ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
+          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
   .permissions([])
   .returns([200, "versions"]) \
   do
-    json_response(History.recent(params[:limit]))
+    if params[:user]
+        json_response(get_latest_version(History.recent_for_user(params[:user], params[:limit]), params[:mode], params[:uris]))
+      else
+        json_response(History.recent(params[:limit]))
+      end
   end
 
 
@@ -105,7 +112,27 @@ class ArchivesSpaceService < Sinatra::Base
     elsif mode.start_with?('d')
       version.data
     else
-      version.json(params[:uris])
+      version.json(uris)
     end
+  end
+
+
+  def get_latest_version(versions, mode, uris)
+    latest = versions.values.first
+    history = History.new(latest[:model], latest[:record_id])
+    version = history.version(latest[:lock_version])
+    if mode.start_with?('f')
+      {
+        :json => version.json(uris),
+        :data => version.data,
+        :diff => (history.diff(version.time, version.time - 1) rescue History::VersionNotFound && nil),
+        :versions => versions,
+      }
+    elsif mode.start_with?('d')
+      version.data
+    else
+      version.json(uris)
+    end
+
   end
 end

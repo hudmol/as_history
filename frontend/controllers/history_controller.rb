@@ -3,7 +3,10 @@ class HistoryController < ApplicationController
   skip_before_filter :unauthorised_access
 
   def index
-    @recent = JSONModel::HTTP.get_json("/history")
+    args = {:mode => 'full'}
+    args[:user] = params[:user] if params[:user]
+    @version = JSONModel::HTTP.get_json("/history", args)
+    render :version
   end
 
 

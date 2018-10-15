@@ -41,6 +41,9 @@
 
     ASHistory.prototype.setUpHistory = function() {
 	this.setDiffMode(localStorage.getItem('as_history_show_diff_mode'));
+	if (ASHISTORY_USER) {
+	    $('#as-history-tb-user-button').css('background', '#ddd');
+	}
     };
 
     exports.ASHistory = ASHistory;

@@ -98,7 +98,15 @@ class History < Sequel::Model(:history)
 
 
   def self.recent(limit = 10)
-    Hash[db[:history].reverse(:user_mtime).select(*fields.reject{|f| f == :json}).limit(limit).all
+    Hash[db[:history].reverse(:user_mtime)
+           .select(*fields.reject{|f| f == :json}).limit(limit).all
+           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), r]}]
+  end
+
+
+  def self.recent_for_user(user, limit = 10)
+    Hash[db[:history].filter(:last_modified_by => user).reverse(:user_mtime)
+           .select(*fields.reject{|f| f == :json}).limit(limit).all
            .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), r]}]
   end
 
