@@ -22,6 +22,7 @@
 	    $('.history-diff-field').slideUp();
 	    $('.history-clean-field').slideDown();
 	    $('.history-change').slideDown();
+	    mode = 'all';
 	}
         this.updateDiffButtons('as-history-tb-diff-' + mode + '-button');
 	localStorage.setItem('as_history_show_diff_mode', mode);
