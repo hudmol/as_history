@@ -9,29 +9,38 @@
         $('#' + on_button).css('background', '#eee');
     };
 
+    ASHistory.prototype.setDiffMode = function(mode) {
+	if (mode == 'only') {
+	    $('.history-diff-field').slideUp();
+	    $('.history-clean-field').slideUp();
+	    $('.history-change').slideDown();
+	} else if (mode == 'clean') {
+	    $('.history-diff-field').slideDown();
+	    $('.history-clean-field').slideDown();
+	    $('.history-change').slideUp();
+	} else { // 'all'
+	    $('.history-diff-field').slideUp();
+	    $('.history-clean-field').slideDown();
+	    $('.history-change').slideDown();
+	}
+        this.updateDiffButtons('as-history-tb-diff-' + mode + '-button');
+	localStorage.setItem('as_history_show_diff_mode', mode);
+    };
+
     ASHistory.prototype.showDiffOnlyClick = function() {
-	$('.history-diff-field').slideUp();
-	$('.history-clean-field').slideUp();
-	$('.history-change').slideDown();
-        this.updateDiffButtons('as-history-tb-diff-only-button');
+	this.setDiffMode('only');
     };
 
     ASHistory.prototype.showDiffAllClick = function() {
-	$('.history-diff-field').slideUp();
-	$('.history-clean-field').slideDown();
-	$('.history-change').slideDown();
-        this.updateDiffButtons('as-history-tb-diff-all-button');
+	this.setDiffMode('all');
     };
 
     ASHistory.prototype.showDiffCleanClick = function() {
-	$('.history-diff-field').slideDown();
-	$('.history-clean-field').slideDown();
-	$('.history-change').slideUp();
-        this.updateDiffButtons('as-history-tb-diff-clean-button');
+	this.setDiffMode('clean');
     };
 
     ASHistory.prototype.setUpHistory = function() {
-	this.showDiffAllClick();
+	this.setDiffMode(localStorage.getItem('as_history_show_diff_mode'));
     };
 
     exports.ASHistory = ASHistory;
