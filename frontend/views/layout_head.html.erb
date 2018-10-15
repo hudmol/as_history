@@ -42,13 +42,6 @@
   <meta name="history_uri" content="<%= history_uri %>">
   <script>
 
-  $(function() {
-
-    var as_history = new ASHistory();
-    window.as_history = as_history;
-
-  });
-
     // for resources - sigh
     $(window).on("loadedrecordform.aspace", function() {
       $('#archivesSpaceSidebar').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
