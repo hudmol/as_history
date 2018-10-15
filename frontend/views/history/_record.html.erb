@@ -34,7 +34,7 @@
 
       sct.each do |h|
         v = h[:value]
-        unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) || (k == 'repository' && !top)
+        unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) || (['repository', 'parent'].include?(k) && !top)
 %>
           <div class="history-field <%= h[:class] %>">
             <span class="history-field-label">
