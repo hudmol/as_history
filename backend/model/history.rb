@@ -139,6 +139,10 @@ class History < Sequel::Model(:history)
     end
 
 
+    def version
+      @data[:lock_version]
+    end
+
     def time
       @data[:user_mtime]
     end

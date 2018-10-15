@@ -49,12 +49,13 @@ class ArchivesSpaceService < Sinatra::Base
           ["id", Integer, "The ID"],
           ["version", Integer, "The version"],
           ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
+          ["diff", Integer, "The version to diff from in full mode", :optional => true],
           ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
   .permissions([])
   .returns([200, "version"]) \
   do
     begin
-      json_response(get_version(params[:model], params[:id], params[:version], params[:mode], params[:uris]))
+      json_response(get_version(params[:model], params[:id], params[:version], params[:mode], params[:uris], params[:diff]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 400)
     end
@@ -99,14 +100,15 @@ class ArchivesSpaceService < Sinatra::Base
   end
 
 
-  def get_version(model, id, version_or_time, mode, uris)
+  def get_version(model, id, version_or_time, mode, uris, diff = nil)
     history = History.new(model, id)
     version = history.version(version_or_time)
+    diff_version = diff || version.version - 1
     if mode.start_with?('f')
       {
         :json => version.json(uris),
         :data => version.data,
-        :diff => (history.diff(version.time, version.time - 1) rescue History::VersionNotFound && nil),
+        :diff => (history.diff(version.version, diff_version) rescue History::VersionNotFound && nil),
         :versions => history.versions,
       }
     elsif mode.start_with?('d')
@@ -125,7 +127,7 @@ class ArchivesSpaceService < Sinatra::Base
       {
         :json => version.json(uris),
         :data => version.data,
-        :diff => (history.diff(version.time, version.time - 1) rescue History::VersionNotFound && nil),
+        :diff => (history.diff(version.version, version.version - 1) rescue History::VersionNotFound && nil),
         :versions => versions,
       }
     elsif mode.start_with?('d')
@@ -133,6 +135,6 @@ class ArchivesSpaceService < Sinatra::Base
     else
       version.json(uris)
     end
-
   end
+
 end

@@ -4,6 +4,7 @@ ArchivesSpace::Application.routes.draw do
       match('/history' => 'history#index', :via => [:get])
       match('/history/:model/:id' => 'history#record', :via => [:get])
       match('/history/:model/:id/:version' => 'history#version', :via => [:get])
+      match('/history/:model/:id/:version/:diff' => 'history#version', :via => [:get])
     end
   end
 end

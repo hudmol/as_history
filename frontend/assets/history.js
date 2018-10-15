@@ -45,6 +45,18 @@
 	if (ASHISTORY_USER) {
 	    $('#as-history-tb-user-button').css('background', '#ddd');
 	}
+        if (!isNaN(ASHISTORY_DIFF)) {
+	    $('.history-version-box').each(function() {
+		    var version = parseInt($(this).data('version'));
+		    if (version < ASHISTORY_VERSION) {
+			if (version == ASHISTORY_DIFF) {
+			    $(this).children().addClass('history-showing-diff-version');
+			} else if (version > ASHISTORY_DIFF) {
+			    $(this).children().addClass('history-showing-diff-included-version');
+			}
+		    }
+	    });
+	}
     };
 
     exports.ASHistory = ASHistory;

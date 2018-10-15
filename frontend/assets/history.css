@@ -1,9 +1,11 @@
 .history-version {
+  position: relative;
   width: 100%;
   border: 2px solid #ccc;
   border-radius: 4px;
   margin: 4px;
   padding: 4px;
+  z-index: 1;
 }
 
 .history-field {
@@ -22,11 +24,18 @@
 }
 
 .history-clean-field {
-
 }
 
 .history-showing-version {
-  background: #aaccff;
+  background: #bfb;
+}
+
+.history-showing-diff-version {
+  background: #fdd;
+}
+
+.history-showing-diff-included-version {
+  background: #fee;
 }
 
 .history-subrecord {
@@ -43,4 +52,21 @@
 
 .as-history-toolbar {
   margin-left: -1px;
+}
+
+.history-sidebar {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+#history-sb-diff-range-marker {
+  display: none;
+  position: absolute;
+  border: 0px solid black;
+  background: #ccc;
+  top: 0px;
+  left: 0px;
+  width: 105%;
+  height: 200px;
+  z-index: 0;
 }

@@ -10,6 +10,8 @@
     });
 
     ASHISTORY_USER = '<%= params[:user] %>';
+    ASHISTORY_VERSION = <%= params[:version] %>;
+    ASHISTORY_DIFF = <%= params[:diff] || params[:version].to_i - 1 %>;
 
   </script>
 <% end %>
