@@ -6,6 +6,10 @@
   padding: 4px;
 }
 
+.history-field {
+  display: none;
+}
+
 .history-add {
   color: #0c0;
 }
@@ -15,7 +19,6 @@
 }
 
 .history-diff-field {
-  display: none;
 }
 
 .history-clean-field {
