@@ -37,7 +37,7 @@ class HistoryController < ApplicationController
 
   helper_method :time_display
   def time_display(time)
-    Time.utc(*time.split(/\D+/)[0..5]).getlocal
+    Time.utc(*time.split(/\D+/)[0..5]).getlocal.to_s.sub(/ [^ ]+$/, '')
   end
 
 

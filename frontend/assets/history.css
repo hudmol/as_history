@@ -40,3 +40,7 @@
 .as-history-main-pane {
   margin-top: -13px;
 }
+
+.as-history-toolbar {
+  margin-left: -1px;
+}
