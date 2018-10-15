@@ -12,7 +12,7 @@ class ArchivesSpaceService < Sinatra::Base
     if params[:user]
         json_response(get_latest_version(History.recent_for_user(params[:user], params[:limit]), params[:mode], params[:uris]))
       else
-        json_response(History.recent(params[:limit]))
+        json_response(get_latest_version(History.recent(params[:limit]), params[:mode], params[:uris]))
       end
   end
 
