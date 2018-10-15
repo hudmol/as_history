@@ -40,6 +40,11 @@ class HistoryController < ApplicationController
     Time.utc(*time.split(/\D+/)[0..5]).getlocal.to_s.sub(/ [^ ]+$/, '')
   end
 
+  helper_method :version_display
+  def version_display(model, id, version)
+    "#{model} / #{id} .v<strong>#{version}</strong>".html_safe
+  end
+
 
   helper_method :model_pl
   def model_pl

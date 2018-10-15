@@ -1,9 +1,9 @@
 <div class="history-sidebar">
   <% @version['versions'].each do |uri, ver| %>
-    <% showing = ver['lock_version'] == @version['data'].values.first['lock_version'] ? 'history-showing-version' : '' %>
-    <% button_label = [ver['lock_version'],
-                       ver['last_modified_by'],
-                       time_display(ver['user_mtime'])].join(' ') %>
+    <% showing = ver['lock_version'] == data['lock_version'] ? 'history-showing-version' : '' %>
+    <% button_label = version_display(ver['model'], ver['record_id'], ver['lock_version']) + '<br>'.html_safe +
+      [ver['last_modified_by'],
+       time_display(ver['user_mtime'])].join(' ') %>
 
     <%= link_to button_label,
                 File.join(AppConfig[:frontend_prefix], uri).to_s,

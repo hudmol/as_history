@@ -4,7 +4,7 @@
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
     href="<%= '/' + ['history', data['model'], data['record_id'], data['lock_version']].join('/') %>">
-    <%= data['model'] %> / <%= data['record_id'] %>  .v<%= data['lock_version'] %>
+    <%= version_display(data['model'], data['record_id'], data['lock_version']) %>
   </a>
 
   <a id="as-history-tb-user-button"
