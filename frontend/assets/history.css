@@ -7,15 +7,19 @@
 }
 
 .history-add {
-  color: green;
+  color: #0c0;
 }
 
 .history-remove {
-  color: red;
+  color: #f00;
 }
 
-.history-change {
-  color: blue;
+.history-diff-field {
+  display: none;
+}
+
+.history-clean-field {
+
 }
 
 .history-showing-version {

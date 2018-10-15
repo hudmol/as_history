@@ -1,5 +1,18 @@
 <%= stylesheet_link_tag "#{AppConfig[:frontend_prefix]}assets/history.css" %>
 
+<% if controller.controller_name == 'history' %>
+  <%= javascript_include_tag 'history' %>
+  <script>
+
+    $(function() {
+      var as_history = new ASHistory();
+      window.as_history = as_history;
+    });
+
+  </script>
+<% end %>
+
+
 <%
   history_uri = false
   unless action_name == 'new'
@@ -28,6 +41,14 @@
 <% if controller.action_name == 'show' && history_uri %>
   <meta name="history_uri" content="<%= history_uri %>">
   <script>
+
+  $(function() {
+
+    var as_history = new ASHistory();
+    window.as_history = as_history;
+
+  });
+
     // for resources - sigh
     $(window).on("loadedrecordform.aspace", function() {
       $('#archivesSpaceSidebar').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
@@ -41,6 +62,9 @@
       <% if history_uri.start_with?('/history/resource/') %>
         monitorTreeChanges();
       <% end %>
+
+
+
     });
 
     // HELPME: there must be a better way!
@@ -55,5 +79,6 @@
       }
       setTimeout(function() { monitorTreeChanges() }, 1000);
     }
+
   </script>
 <% end %>

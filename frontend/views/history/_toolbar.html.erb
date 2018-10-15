@@ -3,49 +3,54 @@
   <a id="as-history-tb-record-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
-    <span class="glyphicon glyphicon-doc"></span>
+    href="javascript:void(0);">
     <%= data['model'] %> / <%= data['record_id'] %>  .v<%= data['lock_version'] %>
   </a>
 
   <a id="as-history-tb-user-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
-    <span class="glyphicon glyphicon-page"></span>
+    href="javascript:void(0);">
+    <span class="glyphicon glyphicon-user"></span>
     <%= data['last_modified_by'] %>
   </a>
 
   <a id="as-history-tb-version-time-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
-    <span class="glyphicon glyphicon-clock"></span>
+    href="javascript:void(0);">
+    <span class="glyphicon glyphicon-time"></span>
     <%= time_display(data['user_mtime']) %>
   </a>
 </div>
 
-<div class="btn-group">
+<div class="btn-group as-history-tb-diff-button-group">
   <a id="as-history-tb-diff-only-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
-    <span class="glyphicon glyphicon-doc"></span>
-    =
+    onclick="as_history.showDiffOnlyClick();"
+    href="javascript:void(0);">
+    <div style="width:12px;height:2px;background:#f00;margin:8px 0px 2px 0px;"></div>
+    <div style="width:12px;height:2px;background:#0c0;margin:0px 0px 5px 0px;"></div>
   </a>
   <a id="as-history-tb-diff-all-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
-    <span class="glyphicon glyphicon-doc"></span>
-    =
+    onclick="as_history.showDiffAllClick();"
+    href="javascript:void(0);">
+    <div style="width:12px;height:2px;background:#777;margin:3px 0px 2px 0px;"></div>
+    <div style="width:12px;height:2px;background:#f00;margin:0px 0px 2px 0px;"></div>
+    <div style="width:12px;height:2px;background:#0c0;margin:0px 0px 2px 0px;"></div>
+    <div style="width:12px;height:2px;background:#777;margin:0px 0px 2px 0px;"></div>
   </a>
-  <a id="as-history-tb-diff-rec-button"
+  <a id="as-history-tb-diff-clean-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
-    <span class="glyphicon glyphicon-doc"></span>
-    =
+    onclick="as_history.showDiffCleanClick();"
+    href="javascript:void(0);">
+    <div style="width:12px;height:2px;background:#777;margin:5px 0px 2px 0px;"></div>
+    <div style="width:12px;height:2px;background:#777;margin:0px 0px 2px 0px;"></div>
+    <div style="width:12px;height:2px;background:#777;margin:0px 0px 4px 0px;"></div>
   </a>
 </div>
 
@@ -53,7 +58,7 @@
   <a id="as-history-tb-latch-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
+    href="javascript:void(0);">
     <span class="glyphicon glyphicon-clock"></span>
     Latch
   </a>
@@ -61,7 +66,7 @@
   <a id="as-history-tb-latch-target-button"
     class="btn btn-default as-history-tb-button"
     style="color:#337ab7;margin-top:16px;"
-    href="<%=  %>">
+    href="javascript:void(0);">
     <span class="glyphicon glyphicon-clock"></span>
     Version
   </a>
@@ -70,7 +75,7 @@
 <a id="as-history-tb-diff-range-button"
   class="btn btn-default as-history-tb-button"
   style="color:#337ab7;margin-top:16px;"
-  href="<%=  %>">
+  href="javascript:void(0);">
   <span class="glyphicon glyphicon-clock"></span>
   Diff range
 </a>
