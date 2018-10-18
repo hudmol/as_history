@@ -3,4 +3,17 @@ en:
     history:
       label: System History
       button_label: Revision History
+      show_restore_button_label: Restore ...
       diff_from_version: Show differences since .v%{version}
+      restore:
+        title: Restore previous version
+        cancel_button_label: Cancel
+        submit_button_label: Restore .v%{version}
+        help: |
+          Click to attempt to restore a previous version of this record.
+          If successful this will create a new current version (.v%{version}) of this record
+          with values from the restored version.
+        not_from_recent_help: |
+          Restore is not supported from a recent view. Go to the record view to restore a previous version.
+        success_message: Version successfully restored
+        error_message: "Restore failed: %{errors}"

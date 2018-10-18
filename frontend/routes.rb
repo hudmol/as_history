@@ -3,6 +3,7 @@ ArchivesSpace::Application.routes.draw do
     scope prefix do
       match('/history' => 'history#index', :via => [:get])
       match('/history/:model/:id' => 'history#record', :via => [:get])
+      match('/history/restore/:model/:id/:version' => 'history#restore', :via => [:get])
       match('/history/:model/:id/:version' => 'history#version', :via => [:get])
       match('/history/:model/:id/:version/:diff' => 'history#version', :via => [:get])
     end

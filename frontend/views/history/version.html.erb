@@ -24,7 +24,10 @@
 
     <%= render_aspace_partial :partial => "history/toolbar" %>
 
-    <div class="record-pane">
+    <div class="record-pane history-record-pane">
+      <%= render_aspace_partial :partial => "history/restore_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
+      <%= render_aspace_partial :partial => "shared/flash_messages" %>
+
       <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
     </div>
 

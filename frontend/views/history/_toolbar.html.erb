@@ -78,9 +78,10 @@
 <a id="as-history-tb-restore-button"
   class="btn btn-default pull-right as-history-tb-button"
   style="color:#337ab7;margin-top:16px;"
-  href="<%=  %>">
+  onclick="$('#as-history-restore-dialog').slideToggle();"
+  href="javascript:void(0);">
   <span class="glyphicon glyphicon-clock"></span>
-  Restore
+  <%= t('plugins.history.show_restore_button_label') %>
 </a>
 </div>
 

@@ -1,0 +1,33 @@
+<div id="as-history-restore-dialog">
+  <h4><%= t('plugins.history.restore.title') %></h4>
+
+  <% if params[:id] %>
+    <%= t('plugins.history.restore.help', {:version => current_version+1}) %>
+  <% else %>
+    <%= t('plugins.history.restore.not_from_recent_help') %>
+  <% end %>
+
+  <div class="pull-right as-history-restore-dialog-buttons">
+    <a id="as-history-tb-cancel-restore-button"
+      class="btn btn-default"
+      onclick="$('#as-history-restore-dialog').slideUp();"
+      href="javascript:void(0);">
+      <%= t('plugins.history.restore.cancel_button_label') %>
+    </a>
+
+    <% if params[:id] %>
+      <% if params[:version] && params[:version] != current_version.to_s %>
+        <a class="btn btn-primary as-history-tb-submit-restore-button"
+          href="<%= history_uri(params[:model], params[:id], nil, {:restore => params[:version]})  %>">
+          <%= t('plugins.history.restore.submit_button_label', {:version => params[:version]}) %>
+        </a>
+      <% elsif diff_version %>
+        <a class="btn btn-primary as-history-tb-submit-restore-button"
+          href="<%= history_uri(params[:model], params[:id], nil, {:restore => diff_version})  %>">
+          <%= t('plugins.history.restore.submit_button_label', {:version => diff_version}) %>
+        </a>
+      <% end %>
+    <% end %>
+
+  </div>
+</div>

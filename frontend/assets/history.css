@@ -87,3 +87,27 @@
 #as-history-tb-restore-button {
   margin-right: -16px;
 }
+
+#as-history-restore-dialog {
+  display: none;
+  position: absolute;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: white;
+  top: 0px;
+  right: 0px;
+  min-width: 100px;
+  max-width: 50%;
+  margin-top -2px;
+  margin-right: -1px;
+  z-index: 1;
+}
+
+.history-record-pane {
+  position: relative;
+}
+
+.as-history-restore-dialog-buttons {
+  margin-top: 20px;
+}
