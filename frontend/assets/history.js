@@ -45,7 +45,7 @@
 	if (ASHISTORY_USER) {
 	    $('#as-history-tb-user-button').css('background', '#ddd');
 	}
-        if (!isNaN(ASHISTORY_DIFF)) {
+        if (ASHISTORY_ID && !isNaN(ASHISTORY_DIFF)) {
 	    $('.history-version-box').each(function() {
 		    var version = parseInt($(this).data('version'));
 		    if (version < ASHISTORY_VERSION) {

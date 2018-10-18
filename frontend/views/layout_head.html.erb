@@ -20,6 +20,7 @@
     });
 
     ASHISTORY_USER = '<%= params[:user] %>';
+    ASHISTORY_ID = <%= params[:id] || false %>;
     ASHISTORY_VERSION = <%= params[:version] || data['lock_version'] %>;
     ASHISTORY_DIFF = <%= diff_version %>;
 
