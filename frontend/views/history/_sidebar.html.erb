@@ -10,7 +10,7 @@
        time_display(ver['user_mtime'])].join(' ') %>
 
     <div class="history-version-box" data-version="<%= ver['lock_version'] %>">
-      <% if params[:version] && ver['lock_version'] != data['lock_version'] &&
+      <% if params[:id] && ver['lock_version'] != data['lock_version'] &&
             ver['lock_version'] != diff_version &&
             ver['lock_version'] < data['lock_version'] %>
         <a class="btn btn-default as-history-sb-diff-button"
