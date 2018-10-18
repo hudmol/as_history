@@ -44,11 +44,11 @@
 <%
           if v.is_a?(String) && v.start_with?('/history/')
 %>
-            <%= link_to v, v %>
+            <%= va = v.split('/'); link_to version_display(va[2], va[3], va[4]), v %>
 <%
           elsif v.is_a?(Hash) && v.has_key?('ref') && v['ref'].start_with?('/history')
 %>
-            <%= link_to v['ref'], v['ref'] %>
+            <%= va = v['ref'].split('/'); link_to version_display(va[2], va[3], va[4]), v['ref'] %>
 <%
           elsif v.is_a?(Hash)
 %>
