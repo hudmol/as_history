@@ -83,3 +83,7 @@
 .history-version-box {
   position: relative;
 }
+
+#as-history-tb-restore-button {
+  margin-right: -16px;
+}
