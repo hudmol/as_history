@@ -38,6 +38,12 @@ class HistoryController < ApplicationController
     ]
   end
 
+  helper_method :history_uri
+  def history_uri(model, id, version, opts = {})
+    uri = '/' + ['history', model, id, version].join('/')
+    uri += '?' + opts.map{|k,v| "#{k}=#{v}"}.join('&') unless opts.empty?
+  end
+
   helper_method :time_display
   def time_display(time)
     Time.utc(*time.split(/\D+/)[0..5]).getlocal.to_s.sub(/ [^ ]+$/, '')
@@ -71,6 +77,12 @@ class HistoryController < ApplicationController
   helper_method :data
   def data
     @version['data'].values.first
+  end
+
+  helper_method :diff_version
+  def diff_version
+    dv = (params[:diff] || data['lock_version'] - 1).to_i
+    dv < 0 ? false : dv
   end
 
 end

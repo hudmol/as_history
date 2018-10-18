@@ -3,3 +3,4 @@ en:
     history:
       label: System History
       button_label: Revision History
+      diff_from_version: Diff from .v%{version}

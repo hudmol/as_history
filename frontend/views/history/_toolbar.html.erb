@@ -5,8 +5,8 @@
     style="color:#337ab7;margin-top:16px;"
     href="<%= '/' + ['history', data['model'], data['record_id'], data['lock_version']].join('/') %>">
     <%= version_display(data['model'], data['record_id'], data['lock_version']) %>
-    <% if params[:diff] %>
-      .. <%= params[:diff] %>
+    <% if diff_version %>
+      ..<small>v<%= diff_version %></small>
     <% end %>
   </a>
 

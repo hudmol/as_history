@@ -7,11 +7,21 @@
     $(function() {
       var as_history = new ASHistory();
       window.as_history = as_history;
+
+      $('.history-version-box').hover(
+        function() {
+            $(this).find('.as-history-sb-diff-button').show();
+            return true;
+        },
+        function() {
+            $(this).find('.as-history-sb-diff-button').hide();
+            return true;
+        });
     });
 
     ASHISTORY_USER = '<%= params[:user] %>';
-    ASHISTORY_VERSION = <%= params[:version] %>;
-    ASHISTORY_DIFF = <%= params[:diff] || params[:version].to_i - 1 %>;
+    ASHISTORY_VERSION = <%= params[:version] || data['lock_version'] %>;
+    ASHISTORY_DIFF = <%= diff_version %>;
 
   </script>
 <% end %>

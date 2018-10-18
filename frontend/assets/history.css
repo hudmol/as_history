@@ -70,3 +70,16 @@
   height: 200px;
   z-index: 0;
 }
+
+.as-history-sb-diff-button {
+  position:absolute;
+  display: none;
+  top: 8px;
+  left: 8px;
+  padding: 2px;
+  z-index: 2;
+}
+
+.history-version-box {
+  position: relative;
+}

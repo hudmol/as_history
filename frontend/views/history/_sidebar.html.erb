@@ -10,9 +10,19 @@
        time_display(ver['user_mtime'])].join(' ') %>
 
     <div class="history-version-box" data-version="<%= ver['lock_version'] %>">
-    <%= link_to button_label,
-                File.join(AppConfig[:frontend_prefix], uri).to_s,
-                :class => "btn btn-default history-version #{showing}" %>
+      <% if ver['lock_version'] != data['lock_version'] &&
+            ver['lock_version'] != diff_version &&
+            ver['lock_version'] < data['lock_version'] %>
+        <a class="btn btn-default as-history-sb-diff-button"
+           title="<%= t('plugins.history.diff_from_version', {:version => ver['lock_version']}) %>"
+           href="<%= history_uri(params[:model], params[:id], (params[:version] || data['lock_version']), {:diff => ver['lock_version']}) %>">
+          <span class="glyphicon glyphicon-arrow-up"></span>
+        </a>
+      <% end %>
+
+      <%= link_to button_label,
+                  File.join(AppConfig[:frontend_prefix], uri).to_s,
+                  :class => "btn btn-default history-version #{showing}" %>
     </div>
   <% end %>
 
