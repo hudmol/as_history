@@ -6,6 +6,13 @@ module Auditable
     end
   end
 
+
+  def delete
+    History.record_delete(self)
+    super
+  end
+
+
   module ClassMethods
     def sequel_to_jsonmodel(objs, opts = {})
       jsons = super

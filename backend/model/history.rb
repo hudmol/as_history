@@ -61,6 +61,22 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self.record_delete(obj)
+    self.insert(
+                :record_id => obj.id,
+                :model => obj.class.table_name.to_s,
+                :lock_version => obj.lock_version + 1,
+                :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, :repo_id => obj.repo_id),
+                :created_by => obj.created_by,
+                :last_modified_by => obj.last_modified_by,
+                :create_time => obj.create_time,
+                :system_mtime => obj.system_mtime,
+                :user_mtime => Time.now,
+                :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json({:deleted => true}))),
+                )
+  end
+
+
   def self.uri_for(obj, version = nil)
     uri(obj.class.table_name.to_s, obj.id, version)
   end
