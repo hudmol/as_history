@@ -1,6 +1,6 @@
 <%= stylesheet_link_tag "#{AppConfig[:frontend_prefix]}assets/history.css" %>
 
-<% if controller.controller_name == 'history' %>
+<% if session[:user] && controller.controller_name == 'history' %>
   <%= javascript_include_tag 'history' %>
   <script>
 
