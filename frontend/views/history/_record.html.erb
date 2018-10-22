@@ -38,7 +38,15 @@
 %>
           <div class="history-field <%= h[:class] %>">
             <span class="history-field-label">
-              <%= lab = t(data['model'] + '.' + k); lab.is_a?(Hash) ? (lab[:_plural] || k) : lab %>:
+<%
+              if top
+                label = t(data['model'] + '.' + k)
+              else
+                label = t(field.sub(/s$/,'') + '.' + k)
+              end
+              label = (label[:_plural] || k) if label.is_a?(Hash)
+%>
+              <%= label %>:
             </span>
 
 <%
@@ -53,7 +61,7 @@
           elsif v.is_a?(Hash)
 %>
             <div class="history-subrecord">
-              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff], :top => false} %>
+              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff], :top => false, :field => k} %>
             </div>
 <%
           elsif v.is_a?(Array)
@@ -65,7 +73,7 @@
             else
 %>
               <div class="history-subrecord">
-                <%= render_aspace_partial :partial => "history/record", :locals => {:json => r, :diff => d, :top => false} %>
+                <%= render_aspace_partial :partial => "history/record", :locals => {:json => r, :diff => d, :top => false, :field => k} %>
               </div>
 <%
             end
