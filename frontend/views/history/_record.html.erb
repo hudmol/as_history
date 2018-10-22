@@ -79,8 +79,10 @@
             end
           end
         else
+          enum_type = top ? json['jsonmodel_type'] : field.sub(/s$/,'')
+          enum_key = k == 'date_type' ? 'type' : k
 %>
-          <%=  t("enumerations.#{json['jsonmodel_type']}_#{k}.#{v.to_s}", :default => v.to_s) %>
+          <%=  t("enumerations.#{enum_type}_#{enum_key}.#{v.to_s}", :default => v.to_s) %>
 <%
         end
 %>
