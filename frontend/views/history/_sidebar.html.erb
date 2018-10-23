@@ -1,8 +1,5 @@
 <div class="history-sidebar">
 
-  <div id="history-sb-diff-range-marker">
-  </div>
-
   <% @version['versions'].each do |uri, ver| %>
     <% showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['lock_version'] == data['lock_version'] ? 'history-showing-version' : '' %>
     <% button_label = version_display(ver['model'], ver['record_id'], ver['lock_version']) + '<br>'.html_safe +

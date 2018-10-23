@@ -109,4 +109,10 @@ class HistoryController < ApplicationController
     dv < 0 ? false : dv
   end
 
+
+  helper_method :supported_models
+  def supported_models
+    @supported_models ||= AppConfig[:as_history][:models_with_history].map {|m| {:model => m.underscore, :label => m.gsub(/([A-Z])/, ' \1')} }
+  end
+
 end

@@ -1,15 +1,8 @@
-models_with_history =
-  [
-   Repository,
-   Resource,
-   ArchivalObject,
-   DigitalObject,
-   DigitalObjectComponent,
-   Accession,
-   AgentPerson,
-   AgentCorporateEntity,
-   AgentFamily,
-   AgentSoftware,
-  ]
+if AppConfig.has_key?(:as_history)
+  AppConfig[:as_history][:models_with_history].map {|model| 
+    Kernel.const_get(model).prepend(Auditable)
+}
+else
+  raise 'No config for as_history plugin!'
+end
 
-models_with_history.map {|model| model.prepend(Auditable) }

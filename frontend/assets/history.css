@@ -1,11 +1,49 @@
 .history-version {
   position: relative;
   width: 100%;
-  border: 2px solid #ccc;
-  border-radius: 4px;
   margin: 4px;
-  padding: 4px;
-  z-index: 1;
+}
+
+.history-title-bar {
+  position: relative;
+  margin: 20px 0px 10px 0px;
+  white-space: nowrap;
+  overflow-x: hidden;
+}
+
+.history-current-set-pane {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 12px;
+}
+
+.history-previous-sets-pane {
+  position: relative;
+  vertical-align: top;
+  white-space: nowrap;
+  display: inline-block;
+  overflow-x: auto;
+  margin: 0px 0px 0px 0px;
+  padding-bottom: 10px;
+  max-width: 100%;
+}
+
+.history-previous-version-set {
+  margin: 0px 6px 0px 6px;  
+  color: #999;
+}
+
+.history-version-set {
+  display: inline-block;
+  background: #cef;
+  font-weight: bold;
+  text-align: left;
+}
+
+.history-exit {
+  display: inline-block;
+  background: #cef;
+  color: #000;
 }
 
 .history-field {
@@ -59,18 +97,6 @@
   margin-bottom: 20px;
 }
 
-#history-sb-diff-range-marker {
-  display: none;
-  position: absolute;
-  border: 0px solid black;
-  background: #ccc;
-  top: 0px;
-  left: 0px;
-  width: 105%;
-  height: 200px;
-  z-index: 0;
-}
-
 .as-history-sb-diff-button {
   position:absolute;
   display: none;
@@ -111,3 +137,42 @@
 .as-history-restore-dialog-buttons {
   margin-top: 20px;
 }
+
+.history-browse-select-pane {
+  display: none;
+  margin: 12px 80px 12px 80px;
+  padding: 10px 10px 10px 10px;
+}
+
+.history-select-label {
+  width: 100%;
+}
+
+.history-axis-select {
+  display: inline-block;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  margin: 4px 20px 4px 20px;
+}
+
+.history-control {
+  display: inline-block;
+  width: initial;
+}
+
+.history-control[name=id] {
+  width: 80px;
+}
+
+.history-control[name=user] {
+  width: 100px;
+}
+
+.history-control[name=time] {
+  width: 160px;
+}
+
+.history-control[name=label] {
+  min-width: 50%;
+}
+
