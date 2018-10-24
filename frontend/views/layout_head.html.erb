@@ -59,19 +59,17 @@
 
     // for resources - sigh
     $(window).on("loadedrecordform.aspace", function() {
-      $('#archivesSpaceSidebar').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
+      $('.as-nav-list').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
     });
     // for the other record types - sigh
     $(function() {
       if (!$('#as-history-button').length) {
-        $('#archivesSpaceSidebar').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
+        $('.as-nav-list').append('<%=j render partial: 'history/button', :locals => {:uri => history_uri} %>');
       }
 
       <% if history_uri.start_with?('/history/resource/') %>
         monitorTreeChanges();
       <% end %>
-
-
 
     });
 
