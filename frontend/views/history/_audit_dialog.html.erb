@@ -1,0 +1,21 @@
+<div id="as-history-audit-dialog">
+  <h4><%= t('plugins.history.audit.title') %> .v<%= data['lock_version'] %></h4>
+
+  <% data.each do |k,v| %>
+    <div class="history-audit-field">
+      <span class="history-field-label">
+        <%= t('plugins.history.field.' + k) %>
+      </span>:
+      <%= v %>
+    </div>
+  <% end %>
+
+  <div class="pull-right as-history-dialog-buttons">
+    <a id="as-history-tb-cancel-restore-button"
+      class="btn btn-default"
+      onclick="$('#as-history-audit-dialog').slideUp();"
+      href="javascript:void(0);">
+      <%= t('plugins.history.audit.close_button_label') %>
+    </a>
+  </div>
+</div>

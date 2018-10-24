@@ -1,10 +1,23 @@
 en:
   plugins:
     history:
+      field:
+        record_id: Id
+        model: Model
+        lock_version: Version
+        created_by: Created by
+        last_modified_by: Updated by
+        create_time: Created at
+        system_mtime: Last system update
+        user_mtime: Last user update
+        uri: URI
       label: System History
       button_label: Revision History
-      show_restore_button_label: Restore ...
+      show_restore_button_label: Restore
       diff_from_version: Show differences since .v%{version}
+      audit:
+        title: Audit data for version
+        close_button_label: Close
       restore:
         title: Restore previous version
         cancel_button_label: Cancel

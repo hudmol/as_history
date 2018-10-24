@@ -114,6 +114,25 @@
   margin-right: -16px;
 }
 
+.history-audit-field {
+  margin: 0px 20px 4px 20px;
+}
+
+#as-history-audit-dialog {
+  display: none;
+  position: absolute;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: white;
+  top: 0px;
+  left: 0px;
+  min-width: 100px;
+  max-width: 50%;
+  margin: -1px 0px 10px 114px;
+  z-index: 1;
+}
+
 #as-history-restore-dialog {
   display: none;
   position: absolute;
@@ -134,7 +153,7 @@
   position: relative;
 }
 
-.as-history-restore-dialog-buttons {
+.as-history-dialog-buttons {
   margin-top: 20px;
 }
 

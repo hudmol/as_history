@@ -1,32 +1,4 @@
 <div class="as-history-toolbar">
-<div class="btn-group">
-  <a id="as-history-tb-record-button"
-    class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
-    href="<%= '/' + ['history', data['model'], data['record_id'], data['lock_version']].join('/') %>">
-    <%= version_display(data['model'], data['record_id'], data['lock_version']) %>
-    <% if diff_version %>
-      ..<small>v<%= diff_version %></small>
-    <% end %>
-  </a>
-
-  <a id="as-history-tb-user-button"
-    class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
-    href="<%= '/history?user=' + data['last_modified_by']  %>">
-    <span class="glyphicon glyphicon-user"></span>
-    <%= data['last_modified_by'] %>
-  </a>
-
-  <a id="as-history-tb-version-time-button"
-    class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
-    href="javascript:void(0);">
-    <span class="glyphicon glyphicon-time"></span>
-    <%= time_display(data['user_mtime']) %>
-  </a>
-</div>
-
 <div class="btn-group as-history-tb-diff-button-group">
   <a id="as-history-tb-diff-only-button"
     class="btn btn-default as-history-tb-button"
@@ -57,6 +29,27 @@
   </a>
 </div>
 
+<div class="btn-group">
+  <a id="as-history-tb-record-button"
+    class="btn btn-default as-history-tb-button"
+    style="color:#337ab7;margin-top:16px;"
+    onclick="$('#as-history-audit-dialog').slideToggle();"
+    href="javascript:void(0);">
+    <%= version_display(data['model'], data['record_id'], data['lock_version']) %>
+    <% if diff_version %>
+      ..<small>v<%= diff_version %></small>
+    <% end %>
+    &nbsp;|&nbsp;
+    <span class="glyphicon glyphicon-user"></span>
+    <%= data['last_modified_by'] %>
+    &nbsp;|&nbsp;
+    <span class="glyphicon glyphicon-time"></span>
+    <%= time_display(data['user_mtime']) %>
+
+    <span style="vertical-align:middle;" class="caret"></span>
+  </a>
+</div>
+
 <a id="as-history-tb-restore-button"
   class="btn btn-default pull-right as-history-tb-button"
   style="color:#337ab7;margin-top:16px;"
@@ -64,6 +57,7 @@
   href="javascript:void(0);">
   <span class="glyphicon glyphicon-clock"></span>
   <%= t('plugins.history.show_restore_button_label') %>
+  <span style="vertical-align:middle;" class="caret"></span>
 </a>
 </div>
 
