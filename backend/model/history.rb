@@ -62,11 +62,12 @@ class History < Sequel::Model(:history)
 
 
   def self.record_delete(obj)
+    uri_hash = obj.respond_to?(:repo_id) ? {:repo_id => obj.repo_id} : {}
     self.insert(
                 :record_id => obj.id,
                 :model => obj.class.table_name.to_s,
                 :lock_version => obj.lock_version + 1,
-                :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, :repo_id => obj.repo_id),
+                :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
                 :created_by => obj.created_by,
                 :last_modified_by => obj.last_modified_by,
                 :create_time => obj.create_time,
