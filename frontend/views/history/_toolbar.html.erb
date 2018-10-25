@@ -2,7 +2,6 @@
 <div class="btn-group as-history-tb-diff-button-group">
   <a id="as-history-tb-diff-only-button"
     class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
     onclick="as_history.showDiffOnlyClick();"
     href="javascript:void(0);">
     <div style="width:12px;height:2px;background:#f00;margin:8px 0px 2px 0px;"></div>
@@ -10,7 +9,6 @@
   </a>
   <a id="as-history-tb-diff-all-button"
     class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
     onclick="as_history.showDiffAllClick();"
     href="javascript:void(0);">
     <div style="width:12px;height:2px;background:#777;margin:3px 0px 2px 0px;"></div>
@@ -20,7 +18,6 @@
   </a>
   <a id="as-history-tb-diff-clean-button"
     class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
     onclick="as_history.showDiffCleanClick();"
     href="javascript:void(0);">
     <div style="width:12px;height:2px;background:#777;margin:5px 0px 2px 0px;"></div>
@@ -32,7 +29,6 @@
 <div class="btn-group">
   <a id="as-history-tb-record-button"
     class="btn btn-default as-history-tb-button"
-    style="color:#337ab7;margin-top:16px;"
     onclick="$('#as-history-audit-dialog').slideToggle();"
     href="javascript:void(0);">
     <%= version_display(data['model'], data['record_id'], data['lock_version']) %>
@@ -50,9 +46,22 @@
   </a>
 </div>
 
+<%
+  link_hash = {:controller => model_pl, :action => :show, :id => data['record_id']}
+  link_hash[:agent_type] = data['model'] if model_pl == 'agents'
+
+  if data['model'] == 'archival_object' && json.has_key?('resource')
+    link_hash[:id] = json['resource']['ref'].split('/')[-2]
+    link_hash[:anchor] = "tree::archival_object_#{data['record_id']}"
+  end
+%>
+
+<%= link_to t('plugins.history.exit_button_label'),
+            link_hash,
+            {:class => 'btn btn-default as-history-tb-button'} %>
+
 <a id="as-history-tb-restore-button"
   class="btn btn-default pull-right as-history-tb-button"
-  style="color:#337ab7;margin-top:16px;"
   onclick="$('#as-history-restore-dialog').slideToggle();"
   href="javascript:void(0);">
   <span class="glyphicon glyphicon-clock"></span>

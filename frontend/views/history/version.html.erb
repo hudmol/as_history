@@ -1,26 +1,8 @@
-<%
-  link_hash = {:controller => model_pl, :action => :show}
-  link_hash[:agent_type] = data['model'] if model_pl == 'agents'
-
-  if data['model'] == 'archival_object' && json.has_key?('resource')
-    link_hash[:id] = json['resource']['ref'].split('/')[-2]
-    link_hash[:anchor] = "tree::archival_object_#{data['record_id']}"
-  end
-
-  breadcrumb_trail = [[model_pl.capitalize, {:controller => model_pl, :action => :index}],
-                      [json['name'] || json['display_string'] || json['title'], {:id => data['record_id']}.merge(link_hash)],
-                      [t('plugins.history.button_label')]]
-%>
-
 <% record_title = json['name'] || json['display_string'] || json['title'] %>
 
 <div class="row">
   <div class="col-md-12 history-title-bar">
     <div class="history-current-set-pane">
-      <%= link_to '<span class="glyphicon glyphicon-chevron-left"></span>'.html_safe ,
-                  {:id => data['record_id']}.merge(link_hash),
-                  {:title => 'Return to live record', :class => 'btn btn-default history-exit'} %>
-
       <a class="btn btn-default history-version-set"
          onclick="$('.history-browse-select-pane').slideToggle();">
 
