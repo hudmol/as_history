@@ -1,5 +1,24 @@
 <%= stylesheet_link_tag "#{AppConfig[:frontend_prefix]}assets/history.css" %>
 
+<script type="text/template" id="historySystemButtonTemplate">
+  <%= link_to I18n.t("plugins.history.label"), {:controller => :history, :action => :index} %>
+</script>
+
+<script>
+    // put a link in the System menu
+    $(function() {
+      var setupButton = function(templ) {
+        $but = $(AS.renderTemplate(templ));
+        $('.system-menu .dropdown-menu').append($('<li />').append($but));
+        $('.system-menu').show();
+      };
+
+      setupButton("historySystemButtonTemplate");
+
+    });
+</script>
+
+
 <% if session[:user] && controller.controller_name == 'history' %>
   <%= javascript_include_tag 'history' %>
   <script>
