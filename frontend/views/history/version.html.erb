@@ -14,7 +14,14 @@
     </div>
 
 
-    <div class="history-previous-sets-pane">
+    <a class="btn btn-default history-previous-sets-button"
+       onclick="$('.history-previous-sets-pane').toggle();">
+
+      <%= t('plugins.history.previous_sets_button_label') %>
+      >
+    </a>
+
+    <div class="history-previous-sets-pane" style="display:none;">
       <a style="display:none"
          id="history-previous-version-set-template"
          class="btn btn-default history-previous-version-set"

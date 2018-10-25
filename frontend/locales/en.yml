@@ -13,6 +13,7 @@ en:
         uri: URI
       label: System History
       button_label: Revision History
+      previous_sets_button_label: Previous sets
       exit_button_label: Return to live record
       show_restore_button_label: Restore
       diff_from_version: Show differences since .v%{version}

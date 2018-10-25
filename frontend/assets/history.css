@@ -15,6 +15,7 @@
   display: inline-block;
   vertical-align: top;
   margin-right: 12px;
+  padding-bottom: 10px;
 }
 
 .history-previous-sets-pane {
