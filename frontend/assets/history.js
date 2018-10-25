@@ -140,6 +140,7 @@
 	});
 
 	browse_history[locor].unshift({uri: browse_uri, label: $('.history-version-set').first().text()});
+	browse_history[locor] = browse_history[locor].slice(0,10);
 
 	localStorage.setItem('as_history_browse_history', JSON.stringify(browse_history));
 
