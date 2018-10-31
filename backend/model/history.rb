@@ -32,6 +32,7 @@ class History < Sequel::Model(:history)
   class VersionNotFound < StandardError; end
 
   def self.ensure_current_versions(objs, jsons)
+    return if objs.empty?
     latest_versions = db[:history]
       .filter(:model => objs.first.class.table_name.to_s)
       .filter(:record_id => objs.map{|o| o.id})
