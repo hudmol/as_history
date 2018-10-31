@@ -48,8 +48,8 @@
 
 
 <%
-  history_uri = false
-  unless action_name == 'new'
+  if controller.action_name == 'show'
+    history_uri = false
     [
      @repository,
      @archival_object,
@@ -69,10 +69,10 @@
         end
       end
     end
-  end
+
+    if history_uri
 %>
 
-<% if controller.action_name == 'show' && history_uri %>
   <meta name="history_uri" content="<%= history_uri %>">
   <script>
 
@@ -106,4 +106,8 @@
     }
 
   </script>
-<% end %>
+
+<%
+    end
+  end
+%>
