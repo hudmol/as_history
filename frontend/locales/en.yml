@@ -32,3 +32,6 @@ en:
           Restore is not supported from a recent view. Go to the record view to restore a previous version.
         success_message: Version successfully restored
         error_message: "Restore failed: %{errors}"
+      in_a_rush:
+        category_history: History
+        system_history: System History
