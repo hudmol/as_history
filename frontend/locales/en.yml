@@ -35,3 +35,17 @@ en:
       in_a_rush:
         category_history: History
         system_history: System History
+        record_history: Record History
+        diff_only_history: Show differences only
+        diff_all_history: Show record with differences
+        diff_clean_history: Show clean record
+        record_audit_history: Toggle record audit data
+        exit_history: Return to live record
+        restore_history: Toggle restore dialog
+        quit_history: Return to live record
+        previous_history: Toggle previous searches
+        search_history: Toggle Search dialog
+        goto_diff_history: Go to the diffed version
+        goto_newer_history: Go to the next newer version
+        goto_first_history: Go to the first version in the list
+        goto_last_history: Go to the last version in the list

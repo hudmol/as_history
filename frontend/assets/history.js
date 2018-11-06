@@ -121,10 +121,8 @@
 
 	$(browse_history[locor]).each(function(ix) {
 		var browse_item = this;
-		console.log(browse_item);
 		if (browse_item['uri'] == browse_uri) {
 		    remove_ix.unshift(ix);
-		    console.log('ix ... ' + ix);
 		    return;
 		}
 		var new_button = $('#history-previous-version-set-template').clone();
