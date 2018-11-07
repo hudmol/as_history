@@ -1,0 +1,12 @@
+<% if controller.action_name == 'show' %>
+  <% if current_record.respond_to?(:history) %>
+    <%# Standard archival record types supporting history will respond to this. %>
+    <%= render partial: 'history/button', :locals => {:uri => current_record.history['ref']}  %>
+  <% elsif current_record.jsonmodel_type == 'repository_with_agent' %>
+    <%
+    # The "view repository" screen uses a slightly different record structure,
+    # so we dig in to find the repository's history URI
+    %>
+    <%= render partial: 'history/button', :locals => {:uri => current_record.repository['history']['ref']}  %>
+  <% end %>
+<% end %>

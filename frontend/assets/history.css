@@ -196,3 +196,13 @@
   min-width: 50%;
 }
 
+#as-history-button {
+  width: 100%;
+  text-align: left;
+  color: #337ab7;
+  margin-top: 16px;
+}
+
+.history-nav-list {
+  list-style: none;
+}
