@@ -36,7 +36,7 @@ class History < Sequel::Model(:history)
     latest_versions = db[:history]
       .filter(:model => objs.first.class.table_name.to_s)
       .filter(:record_id => objs.map{|o| o.id})
-      .group(:lock_version)
+      .group(:record_id)
       .select_hash(:record_id, Sequel.function(:max, :lock_version).as(:max_version))
 
     jsons.zip(objs).each do |json, obj|
