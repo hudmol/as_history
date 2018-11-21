@@ -1,6 +1,5 @@
 Things to do:
 
-  - added notes don't show in json until next version
   - ao restore is broken
   - latch to a time?
   - better browse form
