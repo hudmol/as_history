@@ -61,6 +61,8 @@
 }
 
 .history-showing-version {
+  border-color: #aaa;
+  border-width: 2px;
   background: #bfb;
 }
 
