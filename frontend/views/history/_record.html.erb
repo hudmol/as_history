@@ -7,8 +7,8 @@
           sct = [{:class => 'history-change history-add', :value => val, :diff => {'_to' => diff['_adds'][k], '_from' => nil}}]
           sct.push({:class => 'history-diff-field', :value => val})
         elsif diff['_removes'].has_key?(k)
-          sct = [{:class => 'history-change history-remove', :value => diff['_removes'][k], :diff => {'_to' => nil, '_from' => diff['_removes'][k]}}]
-          sct.push({:class => 'history-diff-field', :value => diff['_removes'][k]})
+          sct = [{:class => 'history-change history-remove', :value => val, :diff => {'_to' => nil, '_from' => diff['_removes'][k]}}]
+          sct.push({:class => 'history-diff-field', :value => val})
         elsif diff['_changes'].has_key?(k)
           if diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].keys - skip_fields != []
             sct = [{:class => 'history-change history-remove', :value => diff['_changes'][k]['_from'], :diff => diff['_changes'][k]},

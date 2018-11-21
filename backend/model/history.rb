@@ -234,17 +234,6 @@ class History < Sequel::Model(:history)
   end
 
 
-  def drop_empty_arrays!(hash)
-    hash.keys.each do |k|
-      if hash[k] == []
-        hash.delete(k)
-      end
-    end
-
-    hash
-  end
-
-
   def diff(a, b)
     diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
     return diffs if a == b
@@ -252,49 +241,34 @@ class History < Sequel::Model(:history)
     from_json = version([a,b].min).json(false)
     to_json = version([a,b].max).json(false)
 
-    # Drop empty arrays to ensure that changes to array values get treated as
-    # adds/removes where applicable, not changes.
-    drop_empty_arrays!(from_json)
-    drop_empty_arrays!(to_json)
-
-    # Calculate adds/drops
     (to_json.keys - from_json.keys).each{|k| diffs[:_adds][k] = to_json[k]}
     (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
 
-    # Calculate changes
     (to_json.keys & from_json.keys).each do |k|
       next if History.audit_fields.include?(k.intern)
       next if from_json[k] == to_json[k]
 
-      if from_json[k].is_a?(Array)
-        # Compare our from and to arrays element by element
-        pairwise_changes = []
-        max_len = [from_json[k].length, to_json[k].length].max
-
-        (0...max_len).each do |idx|
-          from = from_json[k][idx]
-          to = to_json[k][idx]
-
-          if from && to
-            hd = _nested_hash_diff(from, to)
-            pairwise_changes.push(hd) unless hd.empty?
+      if from_json[k].is_a? Array
+        ca = []
+        fa = from_json[k] + (Array.new([to_json[k].length - from_json[k].length, 0].max))
+        fa.zip(to_json[k]) do |f, t|
+          if f && t
+            hd = _nested_hash_diff(f,t)
+            ca.push(hd) unless hd.empty?
           else
-            pairwise_changes.push({:_from => from, :_to => to})
+            ca.push({:_from => f, :_to => t})
           end
         end
-
-        diffs[:_changes][k] = pairwise_changes unless pairwise_changes.empty?
-
-      elsif to_json[k].is_a?(Hash)
+        diffs[:_changes][k] = ca unless ca.empty?
+      elsif to_json[k].is_a? Hash
         hd = _nested_hash_diff(from_json[k], to_json[k])
         diffs[:_changes][k] = hd unless hd.empty?
-
       else
         diffs[:_changes][k] = {:_from => from_json[k], :_to => to_json[k]}
       end
     end
 
-    diffs
+    diffs    
   end
 
 
