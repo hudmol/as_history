@@ -101,7 +101,7 @@ class ArchivesSpaceService < Sinatra::Base
           ["id", Integer, "The ID"],
           ["a", Integer, "The 'a' version"],
           ["b", Integer, "The 'b' version"])
-  .permissions([:view_repository])
+  .permissions([:view_all_records])
   .returns([200, "version diff"]) \
   do
     begin
