@@ -6,6 +6,17 @@ class History < Sequel::Model(:history)
 
   def self.register_model(model)
     @@models.push(model)
+
+    model.my_jsonmodel.schema['properties']['history'] = {
+      'type' => 'object',
+      'subtype' => 'ref',
+      'properties' => {
+        'ref' => {
+          'type' => 'uri',
+        }
+      }
+    }
+
     model.prepend(Auditable)
   end
 
