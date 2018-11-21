@@ -279,7 +279,7 @@ class History < Sequel::Model(:history)
             hd = _nested_hash_diff(from, to)
             pairwise_changes.push(hd) unless hd.empty?
           else
-            pairwise_changes.push({:_from => fom, :_to => to})
+            pairwise_changes.push({:_from => from, :_to => to})
           end
         end
 
