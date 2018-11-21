@@ -112,7 +112,7 @@ class HistoryController < ApplicationController
 
   helper_method :supported_models
   def supported_models
-    @supported_models ||= AppConfig[:as_history][:models_with_history].map {|m| {:model => m.underscore, :label => m.gsub(/([A-Z])/, ' \1')} }
+    @supported_models ||= MemoryLeak::Resources.get(:history_models).map {|m| {:model => m.underscore, :label => m.gsub(/(.)([A-Z])/, '\1 \2')} }
   end
 
 end
