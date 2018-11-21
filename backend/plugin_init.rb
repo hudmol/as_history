@@ -1,8 +1,25 @@
-if AppConfig.has_key?(:as_history)
-  AppConfig[:as_history][:models_with_history].map {|model| 
-    Kernel.const_get(model).prepend(Auditable)
-}
-else
-  raise 'No config for as_history plugin!'
-end
+[
+ Repository,
+ Accession,
+ Resource,
+ ArchivalObject,
+ DigitalObject,
+ DigitalObjectComponent,
+ Assessment,
+ Classification,
+ CollectionManagement,
+ ContainerProfile,
 
+ AgentPerson,
+ AgentCorporateEntity,
+ AgentFamily,
+ AgentSoftware,
+ Location,
+ Subject,
+ TopContainer,
+ Vocabulary,
+].each do |model|
+
+  History.register_model(model)
+
+end

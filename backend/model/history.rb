@@ -2,6 +2,17 @@ require 'zlib'
 
 class History < Sequel::Model(:history)
 
+  @@models = []
+
+  def self.register_model(model)
+    @@models.push(model)
+    model.prepend(Auditable)
+  end
+
+  def self.models
+    @@models
+  end
+
   def self.fields
     [
      :record_id,

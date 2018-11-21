@@ -112,6 +112,16 @@ class ArchivesSpaceService < Sinatra::Base
   end
 
 
+  Endpoint.get('/history/models')
+  .description("Get a list of models that support history")
+  .params()
+  .permissions([])
+  .returns([200, "(models)"]) \
+  do
+    json_response(History.models)
+  end
+
+
   def get_version(model, id, version_or_time, mode, uris, diff = nil)
     history = History.new(model, id)
     version = history.version(version_or_time)
