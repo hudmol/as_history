@@ -4,8 +4,10 @@ class HistoryController < ApplicationController
                       "administer_system" => [:restore]
 
   def index
+    @title = "History | Recent updates"
     args = {:mode => 'full'}
     args[:user] = params[:user] if params[:user]
+    @title += " by #{args[:user]}" if args[:user]
     @version = JSONModel::HTTP.get_json("/history", args)
     render :version
   end
@@ -23,12 +25,14 @@ class HistoryController < ApplicationController
 
 
   def record
+    @title = "History | Revisions for: #{params[:model]} / #{params[:id]}"
     @version = JSONModel::HTTP.get_json("/history/#{params[:model]}/#{params[:id]}", :mode => 'full')
     render :version
   end
 
 
   def version
+    @title = "History | Version: #{params[:model]} / #{params[:id]} .v#{params[:version]}"
     @version = JSONModel::HTTP.get_json("/history/#{params[:model]}/#{params[:id]}/#{params[:version]}", :mode => 'full', :diff => params[:diff])
   end
 

@@ -7,5 +7,4 @@ Things to do:
   - fixup permissions handling
   - fixup repo scoping
   - print css
-  - nicer page titles
   - fixup timezone handling
