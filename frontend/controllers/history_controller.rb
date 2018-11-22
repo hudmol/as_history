@@ -122,6 +122,9 @@ class HistoryController < ApplicationController
 
   helper_method :enum_translator
   def enum_translator(type, field, value)
+    return value unless value.is_a?(String)
+    return value if value.index(' ')
+
     case type
     when 'note'
       type = '_note'
@@ -134,14 +137,9 @@ class HistoryController < ApplicationController
       field = 'iso639_2'
     when 'level'
       type = 'archival_record'
-    when 'date_type'
-      field = 'type'
-    when 'mandate_type'
-      type = 'mandate'
-      field = 'type'
     end
 
-    I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => value.to_s)
+    I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => I18n.t("enumerations.#{field}.#{value.to_s}", :default => value))
   end
 
 end
