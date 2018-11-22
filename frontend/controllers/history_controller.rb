@@ -136,6 +136,9 @@ class HistoryController < ApplicationController
       type = 'archival_record'
     when 'date_type'
       field = 'type'
+    when 'mandate_type'
+      type = 'mandate'
+      field = 'type'
     end
 
     I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => value.to_s)
