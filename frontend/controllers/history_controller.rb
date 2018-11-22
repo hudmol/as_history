@@ -118,6 +118,12 @@ class HistoryController < ApplicationController
 
   helper_method :enum_translator
   def enum_translator(type, field, value)
+    case type
+    when 'note'
+      type = '_note'
+      field = 'types'
+    end
+
     case field
     when 'language'
       type = 'language'
