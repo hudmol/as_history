@@ -115,4 +115,20 @@ class HistoryController < ApplicationController
     @supported_models ||= MemoryLeak::Resources.get(:history_models).map {|m| {:model => m.underscore, :label => m.gsub(/(.)([A-Z])/, '\1 \2')} }
   end
 
+
+  helper_method :enum_translator
+  def enum_translator(type, field, value)
+    case field
+    when 'language'
+      type = 'language'
+      field = 'iso639_2'
+    when 'level'
+      type = 'archival_record'
+    when 'date_type'
+      field = 'type'
+    end
+
+    I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => value.to_s)
+  end
+
 end
