@@ -8,8 +8,8 @@ module Auditable
 
 
   def delete
-    History.record_delete(self)
     super
+    History.record_delete(self)
   end
 
 
