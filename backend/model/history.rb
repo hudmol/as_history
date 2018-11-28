@@ -151,6 +151,31 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self.restore_version!(model, record_id, version_id)
+    formatter = HistoryFormatter.new
+
+    record_model = ASModel.all_models.select {|m| m.table_name == model.intern}.first
+    json = JSONModel::JSONModel(model.intern).from_hash(formatter.get_version(model, record_id, version_id, 'json', false))
+    json.lock_version = formatter.get_version(model, record_id, Time.now, 'data', false).values.first[:lock_version]
+
+    reference = JSONModel.parse_reference(json.uri)
+
+    if reference[:repository]
+      repo_id = JSONModel.parse_reference(reference[:repository])[:id]
+      RequestContext.open(:repo_id => repo_id) do
+        obj = record_model.get_or_die(record_id)
+        obj.update_from_json(json)
+
+        [obj, json]
+      end
+    else
+      obj = record_model.get_or_die(record_id)
+      obj.update_from_json(json)
+
+      [obj, json]
+    end
+  end
+
   ###
 
   class Version
