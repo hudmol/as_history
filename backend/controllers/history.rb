@@ -80,7 +80,10 @@ class ArchivesSpaceService < Sinatra::Base
 
     begin
       (obj, json) = History.restore_version!(params[:model], params[:id], params[:version])
-      updated_response(obj, json)
+
+      RequestContext.open(:repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil) do
+        json_response({:status => 'Restored', :uri => obj.uri})
+      end
     rescue History::VersionNotFound => e
       json_response({:error => e}, 400)
     end
