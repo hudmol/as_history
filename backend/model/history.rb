@@ -55,6 +55,7 @@ class History < Sequel::Model(:history)
 
   def self.ensure_current_versions(objs, jsons)
     return if objs.empty?
+
     latest_versions = db[:history]
       .filter(:model => objs.first.class.table_name.to_s)
       .filter(:record_id => objs.map{|o| o.id})
@@ -76,6 +77,9 @@ class History < Sequel::Model(:history)
                       :user_mtime => obj.user_mtime,
                       :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json))),
                       )
+
+          update_status(obj.class.table_name.to_s, obj.id, obj.lock_version, obj.last_modified_by)
+
         rescue Sequel::UniqueConstraintViolation
           # Someone beat us to it. No worries!
         end
@@ -98,6 +102,18 @@ class History < Sequel::Model(:history)
                 :user_mtime => Time.now,
                 :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json({:deleted => true}))),
                 )
+
+    update_status(obj.class.table_name.to_s, obj.id, obj.lock_version + 1, obj.last_modified_by)
+  end
+
+
+  def self.update_status(model, id, version, user)
+    @stat_counter ||= StatCounter.new(60)
+    SystemStatus.update('Last History Update', :good, "#{model} / #{id} .v#{version} by #{user}")
+    unless @stat_counter.add
+      SystemStatus.update('History Updates', :good, "#{@stat_counter.count} updates in the last #{@stat_counter.sample_time}s")
+      @stat_counter.reset
+    end
   end
 
 
