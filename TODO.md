@@ -7,4 +7,3 @@ Things to do:
   - fixup permissions handling
   - fixup repo scoping
   - print css
-  - fixup timezone handling

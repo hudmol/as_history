@@ -25,30 +25,41 @@ class History < Sequel::Model(:history)
   end
 
   def self.fields
-    [
-     :record_id,
-     :model,
-     :lock_version,
-     :uri,
-     :created_by,
-     :last_modified_by,
-     :create_time,
-     :system_mtime,
-     :user_mtime,
-     :json,
-    ]
+    @@fields ||=
+      [
+       :record_id,
+       :model,
+       :lock_version,
+       :uri,
+       :created_by,
+       :last_modified_by,
+       :create_time,
+       :system_mtime,
+       :user_mtime,
+       :json,
+      ]
   end
 
   def self.audit_fields
-    [
-     :lock_version,
-     :created_by,
-     :last_modified_by,
-     :create_time,
-     :system_mtime,
-     :user_mtime,
-    ]
+    @@audit_fields ||=
+      [
+       :lock_version,
+       :created_by,
+       :last_modified_by,
+       :create_time,
+       :system_mtime,
+       :user_mtime,
+      ]
 
+  end
+
+  def self.datetime_fields
+    @@datetime_fields ||=
+      [
+       :create_time,
+       :system_mtime,
+       :user_mtime,
+      ]
   end
 
   class VersionNotFound < StandardError; end
@@ -156,14 +167,14 @@ class History < Sequel::Model(:history)
   def self.recent(limit = 10)
     Hash[db[:history].reverse(:user_mtime)
            .select(*fields.reject{|f| f == :json}).limit(limit).all
-           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), r]}]
+           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.with_local_time(r)]}]
   end
 
 
   def self.recent_for_user(user, limit = 10)
     Hash[db[:history].filter(:last_modified_by => user).reverse(:user_mtime)
            .select(*fields.reject{|f| f == :json}).limit(limit).all
-           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), r]}]
+           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.with_local_time(r)]}]
   end
 
 
@@ -199,7 +210,12 @@ class History < Sequel::Model(:history)
     def self.list_for(history)
       Hash[history.ds.reverse(:lock_version)
              .select(*History.fields.reject{|f| f == :json}).all
-             .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), r]}]
+             .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), with_local_time(r)]}]
+    end
+
+
+    def self.with_local_time(data)
+      data.map{|k,v| [k, History.datetime_fields.include?(k) ? v.getlocal.strftime("%F %T") : v] }.to_h
     end
 
 
@@ -236,7 +252,7 @@ class History < Sequel::Model(:history)
     private
 
     def _version_or_die(ds)
-      ds.first || raise(History::VersionNotFound.new)
+      Version.with_local_time(ds.first || raise(History::VersionNotFound.new))
     end
 
 

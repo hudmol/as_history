@@ -3,8 +3,7 @@
   <% @version['versions'].each do |uri, ver| %>
     <% showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['lock_version'] == data['lock_version'] ? 'history-showing-version' : '' %>
     <% button_label = version_display(ver['model'], ver['record_id'], ver['lock_version']) + '<br>'.html_safe +
-      [ver['last_modified_by'],
-       time_display(ver['user_mtime'])].join(' ') %>
+      [ver['last_modified_by'], ver['user_mtime']].join(' ') %>
 
     <div class="history-version-box" data-version="<%= ver['lock_version'] %>">
       <% if params[:id] && ver['lock_version'] != data['lock_version'] &&
