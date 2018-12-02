@@ -12,6 +12,8 @@ en:
         user_mtime: Last user update
         uri: URI
       label: System History
+      showing: Showing
+      recent_updates: Recent updates
       button_label: Revision History
       previous_sets_button_label: Previous views
       exit_button_label: Return to live record

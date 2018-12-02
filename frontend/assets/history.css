@@ -9,6 +9,7 @@
   margin: 20px 0px 10px 0px;
   white-space: nowrap;
   overflow-x: hidden;
+  border-bottom: 1px solid #ddd;
 }
 
 .history-current-set-pane {
