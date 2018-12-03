@@ -1,7 +1,7 @@
 <div id="as-history-audit-dialog">
   <h4><%= t('plugins.history.audit.title') %> .v<%= data['lock_version'] %></h4>
 
-  <% data.each do |k,v| %>
+  <% data.reject{|k,v| ['label', 'short_label'].include?(k)}.each do |k,v| %>
     <div class="history-audit-field">
       <span class="history-field-label">
         <%= t('plugins.history.field.' + k) %>

@@ -31,6 +31,7 @@ class History < Sequel::Model(:history)
        :model,
        :lock_version,
        :uri,
+       :label,
        :created_by,
        :last_modified_by,
        :create_time,
@@ -81,6 +82,7 @@ class History < Sequel::Model(:history)
                       :model => obj.class.table_name.to_s,
                       :lock_version => obj.lock_version,
                       :uri => json[:uri],
+                      :label => label_for(json),
                       :created_by => obj.created_by,
                       :last_modified_by => obj.last_modified_by,
                       :create_time => obj.create_time,
@@ -106,6 +108,7 @@ class History < Sequel::Model(:history)
                 :model => obj.class.table_name.to_s,
                 :lock_version => obj.lock_version + 1,
                 :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
+                :label => label_for(History.version(obj.class.table_name.to_s, obj.id, obj.lock_version).json),
                 :created_by => obj.created_by,
                 :last_modified_by => obj.last_modified_by,
                 :create_time => obj.create_time,
@@ -133,6 +136,12 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self.label_for(json)
+    label = json['name'] || json['display_string'] || json['title'] || 'NO LABEL'
+    label.strip.gsub(/<[^>]+>/, ' ').gsub(/\s+/, ' ').slice(0, 255)
+  end
+
+
   def self.uri(model, id, version = nil)
     '/history/' + [model, id, version].compact.join('/')
   end
@@ -149,13 +158,8 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.version(model, id, version, opts = {})
-    History.new(model, id).version(version, opts)
-  end
-
-
-  def self.version_at(model, id, time, opts = {})
-    History.new(model, id).version_at(time, opts)
+  def self.version(model, id, version)
+    History.new(model, id).version(version)
   end
 
 
@@ -167,14 +171,14 @@ class History < Sequel::Model(:history)
   def self.recent(limit = 10)
     Hash[db[:history].reverse(:user_mtime)
            .select(*fields.reject{|f| f == :json}).limit(limit).all
-           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.with_local_time(r)]}]
+           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
   end
 
 
   def self.recent_for_user(user, limit = 10)
     Hash[db[:history].filter(:last_modified_by => user).reverse(:user_mtime)
            .select(*fields.reject{|f| f == :json}).limit(limit).all
-           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.with_local_time(r)]}]
+           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
   end
 
 
@@ -210,12 +214,23 @@ class History < Sequel::Model(:history)
     def self.list_for(history)
       Hash[history.ds.reverse(:lock_version)
              .select(*History.fields.reject{|f| f == :json}).all
-             .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), with_local_time(r)]}]
+             .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
     end
 
 
-    def self.with_local_time(data)
-      data.map{|k,v| [k, History.datetime_fields.include?(k) ? v.getlocal.strftime("%F %T") : v] }.to_h
+    def self.from_row(row)
+      # localize the datetime fields
+      data = row.map{|k,v| [k, History.datetime_fields.include?(k) ? v.getlocal.strftime("%F %T") : v] }.to_h
+
+      # derive a short form of the label
+      data[:short_label] = 
+        if data[:label].length > 30
+          data[:label].slice(0, 17) + '...' + data[:label].slice(-10, 10)
+        else
+          data[:label]
+        end
+
+      data
     end
 
 
@@ -252,7 +267,7 @@ class History < Sequel::Model(:history)
     private
 
     def _version_or_die(ds)
-      Version.with_local_time(ds.first || raise(History::VersionNotFound.new))
+      Version.from_row(ds.first || raise(History::VersionNotFound.new))
     end
 
 
