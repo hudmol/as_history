@@ -107,6 +107,12 @@
 
 .history-version-box {
   position: relative;
+  z-index: 1;
+}
+
+.history-version-box-same-as-last {
+  margin-top: -8px;
+  z-index: 0;
 }
 
 .as-history-tb-button {

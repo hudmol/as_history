@@ -3,19 +3,21 @@
   <%
     last_ver = false
     @version['versions'].each do |uri, ver|
+      same_record_as_last = false
       showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['lock_version'] == data['lock_version'] ? 'history-showing-version' : ''
       button_label = if last_ver && [ver['model'], ver['record_id']] === [last_ver['model'], last_ver['record_id']]
+                       same_record_as_last = true
                        [ver['last_modified_by'], ver['user_mtime']].join(' ') +
                        "  .v<strong>#{ver['lock_version']}</strong>"
                      else
-                       [ver['short_label'], '<br>',
+                       ['<strong>', ver['short_label'], '</strong>', '<br>',
                         version_display(ver['model'], ver['record_id'], ver['lock_version']), '<br>',
                         ver['last_modified_by'], ver['user_mtime']].join(' ')
                      end
       button_label = button_label.html_safe
   %>
 
-    <div class="history-version-box" data-version="<%= ver['lock_version'] %>">
+    <div class="history-version-box <%= 'history-version-box-same-as-last' if same_record_as_last %>" data-version="<%= ver['lock_version'] %>">
       <% if params[:id] && ver['lock_version'] != data['lock_version'] &&
             ver['lock_version'] != diff_version &&
             ver['lock_version'] < data['lock_version'] %>
