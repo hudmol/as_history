@@ -9,6 +9,9 @@ class HistoryController < ApplicationController
     args[:user] = params[:user] if params[:user]
     @title += " by #{args[:user]}" if args[:user]
     @version = JSONModel::HTTP.get_json("/history", args)
+
+    flash.now[:info] = I18n.t('plugins.history.no_version_error_message') unless @version
+
     render :version
   end
 
@@ -27,6 +30,9 @@ class HistoryController < ApplicationController
   def record
     @title = "History | Revisions for: #{params[:model]} / #{params[:id]}"
     @version = JSONModel::HTTP.get_json("/history/#{params[:model]}/#{params[:id]}", :mode => 'full')
+
+    flash.now[:info] = I18n.t('plugins.history.no_version_error_message') unless @version
+
     render :version
   end
 
@@ -34,6 +40,8 @@ class HistoryController < ApplicationController
   def version
     @title = "History | Version: #{params[:model]} / #{params[:id]} .v#{params[:version]}"
     @version = JSONModel::HTTP.get_json("/history/#{params[:model]}/#{params[:id]}/#{params[:version]}", :mode => 'full', :diff => params[:diff])
+
+    flash.now[:info] = I18n.t('plugins.history.no_version_error_message') unless @version
   end
 
 
@@ -97,13 +105,14 @@ class HistoryController < ApplicationController
 
   helper_method :data
   def data
+    return {} unless @version
     @version['data'].values.first
   end
 
 
   helper_method :diff_version
   def diff_version
-    dv = (params[:diff] || data['lock_version'] - 1).to_i
+    dv = (params[:diff] || data.fetch('lock_version', 0) - 1).to_i
     dv < 0 ? false : dv
   end
 

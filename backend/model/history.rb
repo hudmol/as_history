@@ -293,6 +293,7 @@ class History < Sequel::Model(:history)
     @model = model
     @id = id
     @ds = db[:history].filter(:model => @model, :record_id => @id)
+    raise VersionNotFound.new if @ds.empty?
   end
 
 

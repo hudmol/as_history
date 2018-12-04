@@ -11,11 +11,15 @@ class ArchivesSpaceService < Sinatra::Base
   do
     formatter = HistoryFormatter.new
 
-    if params[:user]
+    begin
+      if params[:user]
         json_response(formatter.get_latest_version(History.recent_for_user(params[:user], params[:limit]), params[:mode], params[:uris]))
       else
         json_response(formatter.get_latest_version(History.recent(params[:limit]), params[:mode], params[:uris]))
       end
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 404)
+    end
   end
 
 
@@ -42,7 +46,7 @@ class ArchivesSpaceService < Sinatra::Base
         end
       end
     rescue History::VersionNotFound => e
-      json_response({:error => e}, 400)
+      json_response({:error => e}, 404)
     end
   end
 
@@ -63,7 +67,7 @@ class ArchivesSpaceService < Sinatra::Base
     begin
       json_response(formatter.get_version(params[:model], params[:id], params[:version], params[:mode], params[:uris], params[:diff]))
     rescue History::VersionNotFound => e
-      json_response({:error => e}, 400)
+      json_response({:error => e}, 404)
     end
   end
 
@@ -85,7 +89,7 @@ class ArchivesSpaceService < Sinatra::Base
         json_response({:status => 'Restored', :uri => obj.uri})
       end
     rescue History::VersionNotFound => e
-      json_response({:error => e}, 400)
+      json_response({:error => e}, 404)
     end
   end
 
@@ -102,7 +106,7 @@ class ArchivesSpaceService < Sinatra::Base
     begin
       json_response(History.diff(params[:model], params[:id], params[:a], params[:b]))
     rescue History::VersionNotFound => e
-      json_response({:error => e}, 400)
+      json_response({:error => e}, 404)
     end
   end
 

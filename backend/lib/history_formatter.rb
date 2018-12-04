@@ -20,6 +20,8 @@ class HistoryFormatter
 
 
   def get_latest_version(versions, mode, uris)
+    raise History::VersionNotFound.new if versions.empty?
+
     latest = versions.values.first
     history = History.new(latest[:model], latest[:record_id])
     version = history.version(latest[:lock_version])

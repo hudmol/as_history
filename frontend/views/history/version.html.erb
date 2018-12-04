@@ -1,5 +1,3 @@
-<% record_title = json['name'] || json['display_string'] || json['title'] %>
-
 <div class="row">
   <div class="col-md-12 history-title-bar">
     <div class="history-current-set-pane">
@@ -45,26 +43,32 @@
 </div>
 
 
-<div class="row">
+<% if @version %>
+  <div class="row">
 
-  <div class="col-md-3">
-    <%= render_aspace_partial :partial => "history/sidebar" %>
-  </div>
+    <div class="col-md-3">
+      <%= render_aspace_partial :partial => "history/sidebar" %>
+    </div>
 
-  <div class="col-md-9 as-history-main-pane">
+    <div class="col-md-9 as-history-main-pane">
 
-    <%= render_aspace_partial :partial => "history/toolbar" %>
+      <%= render_aspace_partial :partial => "history/toolbar" %>
 
-    <div class="record-pane history-record-pane">
-      <%= render_aspace_partial :partial => "history/audit_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
-      <%= render_aspace_partial :partial => "history/restore_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
-      <%= render_aspace_partial :partial => "shared/flash_messages" %>
+      <div class="record-pane history-record-pane">
+        <%= render_aspace_partial :partial => "history/audit_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
+        <%= render_aspace_partial :partial => "history/restore_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
+        <%= render_aspace_partial :partial => "shared/flash_messages" %>
 
-      <h4><%= data['label'] %></h4>
+        <h4><%= data['label'] %></h4>
 
-      <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
+        <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
+      </div>
+
     </div>
 
   </div>
+<% else %>
 
-</div>
+  <%= render_aspace_partial :partial => "shared/flash_messages" %>
+
+<% end %>
