@@ -66,10 +66,6 @@
 	    label += ' at ' + $('input[name=time]').val();
 	}
 
-	if ($('input[name=diff]').val() != '') {
-	    label += ' matching diff';
-	}
-
 	$('.history-version-set-label').html(label);
 	if (!jQuery.isEmptyObject(qs)) {
 	    uri += '?';
