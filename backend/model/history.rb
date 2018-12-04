@@ -326,12 +326,12 @@ class History < Sequel::Model(:history)
         fa.zip(to_json[k]) do |f, t|
           if f && t
             hd = _nested_hash_diff(f,t)
-            ca.push(hd) unless hd.empty?
+            ca.push(hd)
           else
             ca.push({:_from => f, :_to => t})
           end
         end
-        diffs[:_changes][k] = ca unless ca.empty?
+        diffs[:_changes][k] = ca if ca.any?{|h| !h.empty?}
       elsif to_json[k].is_a? Hash
         hd = _nested_hash_diff(from_json[k], to_json[k])
         diffs[:_changes][k] = hd unless hd.empty?
@@ -350,6 +350,11 @@ class History < Sequel::Model(:history)
     out = {}
     (from.keys | to.keys).each do |k|
       next if History.audit_fields.include?(k.intern)
+      if from[k].is_a? Hash
+        hd = _nested_hash_diff(from[k], to[k])
+        out[k] = hd unless hd.empty?
+        next
+      end
       next if from[k] == to[k]
       out[k] = {:_from => from[k], :_to => to[k]}
     end
