@@ -1,5 +1,5 @@
 require_relative 'lib/history_resolver.rb'
-require_relative 'lib/history_formatter.rb'
+require_relative 'lib/history_request_handler.rb'
 
 [
  Repository,

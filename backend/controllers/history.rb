@@ -1,22 +1,49 @@
 class ArchivesSpaceService < Sinatra::Base
 
+  Endpoint.get('/history/models')
+  .description("Get a list of models that support history")
+  .params()
+  .permissions([])
+  .returns([200, "(models)"]) \
+  do
+    json_response(History.models)
+  end
+
+
   Endpoint.get('/history')
   .description("Get recently created versions")
   .params(["user", String, "Only show recent versions by user", :optional => true],
           ["limit", Integer, "How many to show", :default => 10],
-          ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
+          ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
           ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
   .permissions([:view_all_records])
   .returns([200, "versions"]) \
   do
-    formatter = HistoryFormatter.new
+    handler = HistoryRequestHandler.new(params)
 
     begin
-      if params[:user]
-        json_response(formatter.get_latest_version(History.recent_for_user(params[:user], params[:limit]), params[:mode], params[:uris]))
-      else
-        json_response(formatter.get_latest_version(History.recent(params[:limit]), params[:mode], params[:uris]))
-      end
+      json_response(handler.get_history)
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 404)
+    end
+  end
+
+
+  Endpoint.get('/history/:model')
+  .description("Get versions of records of the model")
+  .params(["model", String, "The model"],
+          ["limit", Integer, "How many to show", :default => 10],
+          ["user", String, "Only show versions by user", :optional => true],
+          ["at", String, "Return the versions created at or before the specified date/time", :optional => true],
+          ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
+          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
+  .permissions([:view_all_records])
+  .returns([200, "history"]) \
+  do
+    handler = HistoryRequestHandler.new(params)
+
+    begin
+      json_response(handler.get_history(params[:model]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end
@@ -27,24 +54,17 @@ class ArchivesSpaceService < Sinatra::Base
   .description("Get version history for the record")
   .params(["model", String, "The model"],
           ["id", Integer, "The ID"],
+          ["user", String, "Only show versions by user", :optional => true],
           ["at", String, "Return the version current at the specified date/time", :optional => true],
-          ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
+          ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
           ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
   .permissions([:view_all_records])
   .returns([200, "history"]) \
   do
-    formatter = HistoryFormatter.new
+    handler = HistoryRequestHandler.new(params)
 
     begin
-      if params[:at]
-        json_response(formatter.get_version(params[:model], params[:id], params[:at], params[:mode], params[:uris]))
-      else
-        if params[:mode].start_with?('f')
-          json_response(formatter.get_version(params[:model], params[:id], Time.now, params[:mode], params[:uris]))
-        else
-          json_response(History.versions(params[:model], params[:id]))
-        end
-      end
+      json_response(handler.get_history(params[:model], params[:id]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end
@@ -62,10 +82,10 @@ class ArchivesSpaceService < Sinatra::Base
   .permissions([:view_all_records])
   .returns([200, "version"]) \
   do
-    formatter = HistoryFormatter.new
+    handler = HistoryRequestHandler.new(params)
 
     begin
-      json_response(formatter.get_version(params[:model], params[:id], params[:version], params[:mode], params[:uris], params[:diff]))
+      json_response(handler.get_history(params[:model], params[:id], params[:version]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end
@@ -80,8 +100,6 @@ class ArchivesSpaceService < Sinatra::Base
   .permissions([:administer_system])
   .returns([200, "version"]) \
   do
-    formatter = HistoryFormatter.new
-
     begin
       (obj, json) = History.restore_version!(params[:model], params[:id], params[:version])
 
@@ -108,16 +126,6 @@ class ArchivesSpaceService < Sinatra::Base
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end
-  end
-
-
-  Endpoint.get('/history/models')
-  .description("Get a list of models that support history")
-  .params()
-  .permissions([])
-  .returns([200, "(models)"]) \
-  do
-    json_response(History.models)
   end
 
 end

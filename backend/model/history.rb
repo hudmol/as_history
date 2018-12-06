@@ -153,8 +153,36 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.versions(model, id)
-    History.new(model, id).versions
+  def self.apply_filters(dataset, filters)
+    ds = dataset
+    ds = ds.limit(filters.fetch(:limit, 10)) if filters.has_key?(:limit)
+    ds = ds.filter(:model => filters[:model]) if filters.has_key?(:model)
+    ds = ds.filter(:last_modified_by => filters[:user]) if filters.has_key?(:user)
+    ds = ds.where{user_mtime <= filters[:time]} if filters.has_key?(:time)
+    ds = ds.where{lock_version <= filters[:version]} if filters.has_key?(:version)
+    ds
+  end
+
+
+  def self.versions(model, id, filters = {})
+    if model && id
+      History.new(model, id).versions(filters)
+    elsif model
+      History.latest(filters.merge(:model => model))
+    else
+      History.latest(filters)
+    end
+  end
+
+
+  def self.latest(filters = {})
+    ds = History.apply_filters(db[:history], filters)
+      .reverse(:user_mtime)
+      .select(*fields.reject{|f| f == :json})
+
+    raise VersionNotFound.new if ds.empty?
+
+    Hash[ds.all.map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
   end
 
 
@@ -168,26 +196,10 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.recent(limit = 10)
-    Hash[db[:history].reverse(:user_mtime)
-           .select(*fields.reject{|f| f == :json}).limit(limit).all
-           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
-  end
-
-
-  def self.recent_for_user(user, limit = 10)
-    Hash[db[:history].filter(:last_modified_by => user).reverse(:user_mtime)
-           .select(*fields.reject{|f| f == :json}).limit(limit).all
-           .map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
-  end
-
-
   def self.restore_version!(model, record_id, version_id)
-    formatter = HistoryFormatter.new
-
     record_model = ASModel.all_models.select {|m| m.table_name == model.intern}.first
-    json = JSONModel::JSONModel(model.intern).from_hash(formatter.get_version(model, record_id, version_id, 'json', false))
-    json.lock_version = formatter.get_version(model, record_id, Time.now, 'data', false).values.first[:lock_version]
+    json = JSONModel::JSONModel(model.intern).from_hash(History.version(model, record_id, version_id).json(false))
+    json.lock_version = History.versions(model, record_id).values.first[:lock_version]
 
     reference = JSONModel.parse_reference(json.uri)
 
@@ -210,13 +222,6 @@ class History < Sequel::Model(:history)
   ###
 
   class Version
-
-    def self.list_for(history)
-      Hash[history.ds.reverse(:lock_version)
-             .select(*History.fields.reject{|f| f == :json}).all
-             .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
-    end
-
 
     def self.from_row(row)
       # localize the datetime fields
@@ -297,8 +302,12 @@ class History < Sequel::Model(:history)
   end
 
 
-  def versions
-    Version.list_for(self)
+  def versions(filters = {})
+    Hash[History.apply_filters(ds, filters)
+           .reverse(:lock_version)
+           .select(*History.fields.reject{|f| f == :json})
+           .all
+           .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
   end
 
 
