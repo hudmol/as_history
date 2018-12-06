@@ -63,7 +63,9 @@ class History < Sequel::Model(:history)
       ]
   end
 
+
   class VersionNotFound < StandardError; end
+
 
   def self.ensure_current_versions(objs, jsons)
     return if objs.empty?
@@ -143,7 +145,7 @@ class History < Sequel::Model(:history)
 
 
   def self.uri(model, id, version = nil)
-    '/history/' + [model, id, version].compact.join('/')
+    ['/history', model, id, version].compact.join('/')
   end
 
 
@@ -219,7 +221,91 @@ class History < Sequel::Model(:history)
     end
   end
 
+
+  attr_reader :ds
+
+  def initialize(model, id)
+    @model = model
+    @id = id
+    @ds = db[:history].filter(:model => @model, :record_id => @id)
+    raise VersionNotFound.new if @ds.empty?
+  end
+
+
+  def versions(filters = {})
+    my_ds = History.apply_filters(ds, filters)
+                   .reverse(:lock_version)
+                   .select(*History.fields.reject{|f| f == :json})
+
+    raise VersionNotFound.new if my_ds.empty?
+
+    Hash[my_ds.all.map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
+  end
+
+
+  def version(version)
+    Version.new(self, version)
+  end
+
+
+  def diff(a, b)
+    diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
+    return diffs if a == b
+
+    from_json = version([a,b].min).json(false)
+    to_json = version([a,b].max).json(false)
+
+    (to_json.keys - from_json.keys).each{|k| diffs[:_adds][k] = to_json[k]}
+    (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
+
+    (to_json.keys & from_json.keys).each do |k|
+      next if History.audit_fields.include?(k.intern)
+      next if from_json[k] == to_json[k]
+
+      if from_json[k].is_a? Array
+        ca = []
+        fa = from_json[k] + (Array.new([to_json[k].length - from_json[k].length, 0].max))
+        fa.zip(to_json[k]) do |f, t|
+          if f && t
+            hd = _nested_hash_diff(f,t)
+            ca.push(hd)
+          else
+            ca.push({:_from => f, :_to => t})
+          end
+        end
+        diffs[:_changes][k] = ca if ca.any?{|h| !h.empty?}
+      elsif to_json[k].is_a? Hash
+        hd = _nested_hash_diff(from_json[k], to_json[k])
+        diffs[:_changes][k] = hd unless hd.empty?
+      else
+        diffs[:_changes][k] = {:_from => from_json[k], :_to => to_json[k]}
+      end
+    end
+
+    diffs    
+  end
+
+
+  private
+
+  def _nested_hash_diff(from, to)
+    out = {}
+    (from.keys | to.keys).each do |k|
+      next if History.audit_fields.include?(k.intern)
+      if from[k].is_a? Hash
+        hd = _nested_hash_diff(from[k], to[k])
+        out[k] = hd unless hd.empty?
+        next
+      end
+      next if from[k] == to[k]
+      out[k] = {:_from => from[k], :_to => to[k]}
+    end
+    out
+  end
+
+
   ###
+
 
   class Version
 
@@ -286,89 +372,6 @@ class History < Sequel::Model(:history)
       json.gsub(/\"((\/[^\/ \"]+)+)/) {|m| '"' + History.uri_for_uri_at(time, $1)}
     end
 
-  end
-
-
-  ###
-
-
-  attr_reader :ds
-
-  def initialize(model, id)
-    @model = model
-    @id = id
-    @ds = db[:history].filter(:model => @model, :record_id => @id)
-    raise VersionNotFound.new if @ds.empty?
-  end
-
-
-  def versions(filters = {})
-    Hash[History.apply_filters(ds, filters)
-           .reverse(:lock_version)
-           .select(*History.fields.reject{|f| f == :json})
-           .all
-           .map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
-  end
-
-
-  def version(version)
-    Version.new(self, version)
-  end
-
-
-  def diff(a, b)
-    diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
-    return diffs if a == b
-
-    from_json = version([a,b].min).json(false)
-    to_json = version([a,b].max).json(false)
-
-    (to_json.keys - from_json.keys).each{|k| diffs[:_adds][k] = to_json[k]}
-    (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
-
-    (to_json.keys & from_json.keys).each do |k|
-      next if History.audit_fields.include?(k.intern)
-      next if from_json[k] == to_json[k]
-
-      if from_json[k].is_a? Array
-        ca = []
-        fa = from_json[k] + (Array.new([to_json[k].length - from_json[k].length, 0].max))
-        fa.zip(to_json[k]) do |f, t|
-          if f && t
-            hd = _nested_hash_diff(f,t)
-            ca.push(hd)
-          else
-            ca.push({:_from => f, :_to => t})
-          end
-        end
-        diffs[:_changes][k] = ca if ca.any?{|h| !h.empty?}
-      elsif to_json[k].is_a? Hash
-        hd = _nested_hash_diff(from_json[k], to_json[k])
-        diffs[:_changes][k] = hd unless hd.empty?
-      else
-        diffs[:_changes][k] = {:_from => from_json[k], :_to => to_json[k]}
-      end
-    end
-
-    diffs    
-  end
-
-
-  private
-
-  def _nested_hash_diff(from, to)
-    out = {}
-    (from.keys | to.keys).each do |k|
-      next if History.audit_fields.include?(k.intern)
-      if from[k].is_a? Hash
-        hd = _nested_hash_diff(from[k], to[k])
-        out[k] = hd unless hd.empty?
-        next
-      end
-      next if from[k] == to[k]
-      out[k] = {:_from => from[k], :_to => to[k]}
-    end
-    out
   end
 
 end

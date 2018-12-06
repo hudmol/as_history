@@ -1,5 +1,12 @@
 class ArchivesSpaceService < Sinatra::Base
 
+  COMMON_PARAMS =
+    [
+     ["user",  String,       "Only show updates by user", :optional => true],
+     ["at",    String,       "Only show updates at or before the specified date/time", :optional => true],
+     ["uris",  BooleanParam, "Convert uris to historical equivalents", :default => true],
+    ]
+
   Endpoint.get('/history/models')
   .description("Get a list of models that support history")
   .params()
@@ -12,10 +19,9 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history')
   .description("Get recently created versions")
-  .params(["user", String, "Only show recent versions by user", :optional => true],
+  .params(*COMMON_PARAMS,
           ["limit", Integer, "How many to show", :default => 10],
-          ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
-          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
+          ["mode", String, "What data to return - list, json, data, full", :default => 'list'])
   .permissions([:view_all_records])
   .returns([200, "versions"]) \
   do
@@ -31,12 +37,10 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history/:model')
   .description("Get versions of records of the model")
-  .params(["model", String, "The model"],
+  .params(*COMMON_PARAMS,
+          ["model", String, "The model"],
           ["limit", Integer, "How many to show", :default => 10],
-          ["user", String, "Only show versions by user", :optional => true],
-          ["at", String, "Return the versions created at or before the specified date/time", :optional => true],
-          ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
-          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
+          ["mode", String, "What data to return - list, json, data, full", :default => 'list'])
   .permissions([:view_all_records])
   .returns([200, "history"]) \
   do
@@ -52,12 +56,11 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history/:model/:id')
   .description("Get version history for the record")
-  .params(["model", String, "The model"],
+  .params(*COMMON_PARAMS,
+          ["model", String, "The model"],
           ["id", Integer, "The ID"],
-          ["user", String, "Only show versions by user", :optional => true],
-          ["at", String, "Return the version current at the specified date/time", :optional => true],
           ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
-          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
+          ["limit", Integer, "How many to show", :optional => true])
   .permissions([:view_all_records])
   .returns([200, "history"]) \
   do
@@ -73,12 +76,13 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history/:model/:id/:version')
   .description("Get a version of the record")
-  .params(["model", String, "The model"],
+  .params(*COMMON_PARAMS,
+          ["model", String, "The model"],
           ["id", Integer, "The ID"],
           ["version", Integer, "The version"],
           ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
           ["diff", Integer, "The version to diff from in full mode", :optional => true],
-          ["uris", BooleanParam, "Convert uris to historical equivalents", :default => true])
+          ["limit", Integer, "How many to show", :optional => true])
   .permissions([:view_all_records])
   .returns([200, "version"]) \
   do

@@ -25,7 +25,7 @@ class HistoryRequestHandler
         [
          history,
          history.version(version || time || Time.now),
-         history.versions
+         history.versions(filters)
         ]
       else
         versions = History.versions(model, id, filters.merge(:mode => 'list'))
@@ -50,8 +50,8 @@ class HistoryRequestHandler
 
     when /^f/ # full
       {
-        :json => version.json(convert_uris),
         :data => version.data,
+        :json => version.json(convert_uris),
         :diff => (history.diff(version.version, diff || version.version - 1) rescue History::VersionNotFound && nil),
         :versions => list,
       }
