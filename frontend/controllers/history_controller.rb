@@ -149,6 +149,9 @@ class HistoryController < ApplicationController
       field = 'types'
     when 'linked_agent'
       field = 'archival_record_relators' if field == 'relator'
+    when 'sub_container'
+      type = 'container'
+      field = 'type' if field.start_with?('type')
     end
 
     case field
