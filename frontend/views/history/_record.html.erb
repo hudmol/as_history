@@ -26,8 +26,8 @@
           sct.push({:class => 'history-change history-add', :value => diff['_to'][k]}) if diff['_to'] && diff['_to'][k]
         elsif diff.has_key?(k) && diff[k].is_a?(Hash)
           if diff[k].has_key?('_from')
-            sct = [{:class => 'history-change history-remove', :value => diff[k]['_from']},
-                   {:class => 'history-change history-add', :value => diff[k]['_to']}]
+            sct.push({:class => 'history-change history-remove', :value => diff[k]['_from']}) if diff[k]['_from']
+            sct.push({:class => 'history-change history-add', :value => diff[k]['_to']}) if diff[k]['_to']
           else
             sct = [{:class => 'history-change', :value => val, :diff => diff[k]}]
             sct.push({:class => 'history-diff-field', :value => val})
