@@ -147,6 +147,8 @@ class HistoryController < ApplicationController
     when 'note'
       type = '_note'
       field = 'types'
+    when 'linked_agent'
+      field = 'archival_record_relators' if field == 'relator'
     end
 
     case field
