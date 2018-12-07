@@ -18,6 +18,11 @@ class HistoryController < ApplicationController
       @title += " by #{params[:user]}"
     end
 
+    if params[:time]
+      args[:at] = params[:time]
+      @title += " at #{params[:time]}"
+    end
+
     @version = JSONModel::HTTP.get_json(url, args)
 
     flash.now[:info] = I18n.t('plugins.history.no_version_error_message') unless @version
@@ -162,6 +167,7 @@ class HistoryController < ApplicationController
                          : t('plugins.history.recent_updates')
     label += " to #{params['model']} records" if params['model'] && !params[:id]
     label += " by #{params['user']}" if params['user']
+    label += " at #{params['time']}" if params['time']
 
     label
   end

@@ -64,6 +64,7 @@
 
 	if ($('input[name=time]').val() != '') {
 	    label += ' at ' + $('input[name=time]').val();
+	    qs['time'] = $('input[name=time]').val();
 	}
 
 	$('.history-version-set-label').html(label);
