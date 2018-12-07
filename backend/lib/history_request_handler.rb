@@ -25,7 +25,7 @@ class HistoryRequestHandler
         [
          history,
          history.version(version || time || Time.now),
-         history.versions(filters)
+         history.versions(filters.reject{|k,v| mode.match(/^f/) && k == :version})
         ]
       else
         versions = History.versions(model, id, filters.merge(:mode => 'list'))
