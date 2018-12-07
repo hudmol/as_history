@@ -13,6 +13,8 @@ en:
         uri: URI
       title: History
       label: System History
+      all_menu_button_label: History - All Recent Updates
+      user_menu_button_label: History - My Recent Updates
       no_version_error_message: No history found for these criteria
       recent_updates: Recent updates
       button_label: Revision History

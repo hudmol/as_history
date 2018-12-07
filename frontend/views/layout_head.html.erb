@@ -6,20 +6,27 @@
 
 <%= javascript_include_tag 'history_in_a_rush' %>
 
-<script type="text/template" id="historySystemButtonTemplate">
-  <%= link_to I18n.t("plugins.history.label"), {:controller => :history, :action => :index} %>
+<script type="text/template" id="historyAllButtonTemplate">
+  <%= link_to I18n.t("plugins.history.all_menu_button_label"), {:controller => :history, :action => :index, :model => nil} %>
+</script>
+
+<script type="text/template" id="historyUserButtonTemplate">
+  <%= link_to I18n.t("plugins.history.user_menu_button_label"), {:controller => :history, :action => :index, :model => nil, :user => current_user} %>
 </script>
 
 <script>
-    // put a link in the System menu
+    // put links in the System menu
     $(function() {
-      var setupButton = function(templ) {
-        $but = $(AS.renderTemplate(templ));
+      var setupButtons = function(all_templ, user_templ) {
+        $('.system-menu .dropdown-menu').append($('<li class="divider" />'));
+        $but = $(AS.renderTemplate(all_templ));
+        $('.system-menu .dropdown-menu').append($('<li />').append($but));
+        $but = $(AS.renderTemplate(user_templ));
         $('.system-menu .dropdown-menu').append($('<li />').append($but));
         $('.system-menu').show();
       };
 
-      setupButton("historySystemButtonTemplate");
+      setupButtons("historyAllButtonTemplate", "historyUserButtonTemplate");
 
     });
 </script>
