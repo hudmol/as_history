@@ -11,8 +11,8 @@ en:
         system_mtime: Last system update
         user_mtime: Last user update
         uri: URI
+      title: History
       label: System History
-      showing: Showing
       no_version_error_message: No history found for these criteria
       recent_updates: Recent updates
       button_label: Revision History
