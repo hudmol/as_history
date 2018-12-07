@@ -6,9 +6,19 @@ class HistoryController < ApplicationController
   def index
     @title = "History | Recent updates"
     args = {:mode => 'full'}
-    args[:user] = params[:user] if params[:user]
-    @title += " by #{args[:user]}" if args[:user]
-    @version = JSONModel::HTTP.get_json("/history", args)
+    url = '/history'
+
+    if params[:model]
+      url += '/' + params[:model]
+      @title += " to #{params[:model]} records"
+    end
+
+    if params[:user]
+      args[:user] = params[:user]
+      @title += " by #{params[:user]}"
+    end
+
+    @version = JSONModel::HTTP.get_json(url, args)
 
     flash.now[:info] = I18n.t('plugins.history.no_version_error_message') unless @version
 
@@ -143,6 +153,17 @@ class HistoryController < ApplicationController
     end
 
     I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => I18n.t("enumerations.#{field}.#{value.to_s}", :default => value))
+  end
+
+
+  helper_method :version_set_label
+  def version_set_label(params, data)
+    label = params['id'] ? "#{params['model']} / #{params['id']} -- #{data['short_label']}"
+                         : t('plugins.history.recent_updates')
+    label += " to #{params['model']} records" if params['model'] && !params[:id]
+    label += " by #{params['user']}" if params['user']
+
+    label
   end
 
 end

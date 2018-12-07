@@ -2,14 +2,12 @@
   <div class="col-md-12 history-title-bar">
     <div class="history-current-set-pane">
       <span class="history-title">
-          <%= t('plugins.history.title') %> :
+        <%= t('plugins.history.title') %> :
       </span>
       <a class="btn btn-default history-version-set"
          onclick="$('.history-browse-select-pane').slideToggle();">
 
-        <%= params['id'] ? "#{params['model']} / #{params['id']} -- #{data['short_label']}"
-                         : t('plugins.history.recent_updates') %>
-        <%= " by #{params['user']}" if params['user'] %>
+        <%= version_set_label(params, data) %>
 
         <span style="vertical-align:middle;" class="caret"></span>
       </a>
