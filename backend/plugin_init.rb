@@ -20,7 +20,6 @@ require_relative 'lib/history_request_handler.rb'
  Location,
  Subject,
  TopContainer,
- Vocabulary,
 ].each do |model|
 
   History.register_model(model)
