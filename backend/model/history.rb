@@ -183,8 +183,8 @@ class History < Sequel::Model(:history)
 
 
   def self.normalize_time(time)
-    @date_time_template ||= '9999-12-31 23:59:59'
-    Time.new(*(time + @date_time_template[time.length .. -1]).split(/[^\d]/)).utc
+    @date_time_mask ||= '9999-12-31 23:59:59'
+    Time.new(*(time + @date_time_mask[time.length .. -1]).split(/[^\d]/)).utc
   end
 
 
