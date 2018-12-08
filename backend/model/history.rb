@@ -78,22 +78,25 @@ class History < Sequel::Model(:history)
 
     jsons.zip(objs).each do |json, obj|
       unless latest_versions[obj.id] && latest_versions[obj.id] == obj.lock_version
-        begin
-          self.insert(
-                      :record_id => obj.id,
-                      :model => obj.class.table_name.to_s,
-                      :lock_version => obj.lock_version,
-                      :uri => json[:uri],
-                      :label => label_for(json),
-                      :created_by => obj.created_by,
-                      :last_modified_by => obj.last_modified_by,
-                      :create_time => obj.create_time,
-                      :system_mtime => obj.system_mtime,
-                      :user_mtime => obj.user_mtime,
-                      :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json))),
-                      )
 
-          update_status(obj.class.table_name.to_s, obj.id, obj.lock_version, obj.last_modified_by)
+        hist = {
+          :record_id => obj.id,
+          :model => obj.class.table_name.to_s,
+          :lock_version => obj.lock_version,
+          :uri => json[:uri],
+          :label => label_for(json),
+          :created_by => obj.created_by,
+          :last_modified_by => obj.last_modified_by,
+          :create_time => obj.create_time,
+          :system_mtime => obj.system_mtime,
+          :user_mtime => obj.user_mtime,
+          :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json))),
+        }
+
+        begin
+          self.insert(hist)
+
+          update_status(hist)
 
         rescue Sequel::UniqueConstraintViolation
           # Someone beat us to it. No worries!
@@ -105,29 +108,37 @@ class History < Sequel::Model(:history)
 
   def self.record_delete(obj)
     uri_hash = obj.respond_to?(:repo_id) ? {:repo_id => obj.repo_id} : {}
-    self.insert(
-                :record_id => obj.id,
-                :model => obj.class.table_name.to_s,
-                :lock_version => obj.lock_version + 1,
-                :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
-                :label => label_for(History.version(obj.class.table_name.to_s, obj.id, obj.lock_version).json),
-                :created_by => obj.created_by,
-                :last_modified_by => obj.last_modified_by,
-                :create_time => obj.create_time,
-                :system_mtime => obj.system_mtime,
-                :user_mtime => Time.now,
-                :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json({:deleted => true}))),
-                )
 
-    update_status(obj.class.table_name.to_s, obj.id, obj.lock_version + 1, obj.last_modified_by)
+    hist = {
+      :record_id => obj.id,
+      :model => obj.class.table_name.to_s,
+      :lock_version => obj.lock_version + 1,
+      :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
+      :label => label_for(History.version(obj.class.table_name.to_s, obj.id, obj.lock_version).json),
+      :created_by => obj.created_by,
+      :last_modified_by => obj.last_modified_by,
+      :create_time => obj.create_time,
+      :system_mtime => obj.system_mtime,
+      :user_mtime => Time.now,
+      :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json({:deleted => true}))),
+    }
+
+    self.insert(hist)
+
+    update_status(hist)
   end
 
 
-  def self.update_status(model, id, version, user)
+  def self.update_status(hist)
     @stat_counter ||= StatCounter.new(60)
-    SystemStatus.update('Last History Update', :good, "#{model} / #{id} .v#{version} by #{user}")
+
+    SystemStatus.update('Last History Update', :good,
+                        "#{hist[:model]} / #{hist[:record_id]} .v#{hist[:lock_version]} by #{hist[:last_modified_by]} -- #{hist[:label]}")
+
     unless @stat_counter.add
-      SystemStatus.update('History Updates', :good, "#{@stat_counter.count} updates in the last #{@stat_counter.sample_time}s")
+      SystemStatus.update('History Updates', 60 * @stat_counter.count / @stat_counter.sample_time < 10  ? :good : :busy,
+                          "#{@stat_counter.count} updates in the last #{@stat_counter.sample_time}s")
+
       @stat_counter.reset
     end
   end
