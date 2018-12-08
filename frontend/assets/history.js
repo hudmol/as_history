@@ -116,7 +116,7 @@
 	var remove_ix = [];
 	var browse_uri = location.pathname;
 	browse_uri = browse_uri.replace(/(\/\d+)\/\d+$/, '$1');
-	browse_uri += location.search;
+	browse_uri += location.search.replace(/\?diff=\d+$/, '');
 
 	$(browse_history[locor]).each(function(ix) {
 		var browse_item = this;
