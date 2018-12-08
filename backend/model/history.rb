@@ -160,9 +160,20 @@ class History < Sequel::Model(:history)
     ds = ds.limit(filters.fetch(:limit, 10)) if filters.has_key?(:limit)
     ds = ds.filter(:model => filters[:model]) if filters.has_key?(:model)
     ds = ds.filter(:last_modified_by => filters[:user]) if filters.has_key?(:user)
-    ds = ds.where{user_mtime <= filters[:time]} if filters.has_key?(:time)
+
+    if filters.has_key?(:time)
+      time = complete_time(filters[:time])
+      ds = ds.where{user_mtime <= time}
+    end
+
     ds = ds.where{lock_version <= filters[:version]} if filters.has_key?(:version)
     ds
+  end
+
+
+  def self.complete_time(time)
+    @date_time_template ||= '9999-12-31 23:59:59.99'
+    time + @date_time_template[time.length .. -1]
   end
 
 
