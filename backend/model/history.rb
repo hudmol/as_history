@@ -162,7 +162,7 @@ class History < Sequel::Model(:history)
     ds = ds.filter(:last_modified_by => filters[:user]) if filters.has_key?(:user)
 
     if filters.has_key?(:time)
-      time = complete_time(filters[:time])
+      time = normalize_time(filters[:time])
       ds = ds.where{user_mtime <= time}
     end
 
@@ -171,9 +171,9 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.complete_time(time)
-    @date_time_template ||= '9999-12-31 23:59:59.99'
-    time + @date_time_template[time.length .. -1]
+  def self.normalize_time(time)
+    @date_time_template ||= '9999-12-31 23:59:59'
+    Time.new(*(time + @date_time_template[time.length .. -1]).split(/[^\d]/)).utc
   end
 
 

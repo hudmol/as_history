@@ -12,38 +12,48 @@
 
   </div>
 
-  <div class="history-axis-select history-axis-record">
+  <div class="history-axis-select history-axis-model">
     <div>
-    Record
+      Model
     </div>
 
-    <select name="model" class="form-control history-control">
+    <input type="checkbox" <%= 'checked' if params['model'] %>>
+    <select name="model" class="form-control history-control" <%= 'disabled' unless params['model'] %>>
       <option value="_all">All models</option>
       <% supported_models.each do |model| %>
         <% selected = data['model'] == model[:model] ? 'selected' : '' %>
         <option value="<%= model[:model] %>" <%= selected %>><%= model[:label] %></option>
       <% end %>
     </select>
+  </div>
 
     /
 
-    <input name="id" class="form-control history-control" placeholder="All IDs" value="<%= data['record_id'] %>">
+  <div class="history-axis-select history-axis-id">
+    <div>
+      ID
+    </div>
+
+    <input type="checkbox" <%= 'checked' if params['id'] %>>
+    <input name="id" class="form-control history-control" placeholder="All IDs" value="<%= data['record_id'] %>" <%= 'disabled' unless params['id'] %>>
   </div>
 
   <div class="history-axis-select history-axis-user">
     <div>
-    Updates by
+      By user
     </div>
 
-    <input name="user" class="form-control history-control" placeholder="All users" value="<%= params['user'] %>">
+    <input type="checkbox" <%= 'checked' if params['user'] %>>
+    <input name="user" class="form-control history-control" placeholder="All users" value="<%= params['user'] || data['last_modified_by'] %>" <%= 'disabled' unless params['user'] %>>
   </div>
 
   <div class="history-axis-select history-axis-time">
     <div>
-    At time
+      At time
     </div>
 
-    <input name="time" class="form-control history-control" placeholder="Now" value="<%= params['at'] %>">
+    <input type="checkbox" <%= 'checked' if params['time'] %>>
+    <input name="time" class="form-control history-control" placeholder="Now" value="<%= params['time'] || data['user_mtime'] %>" <%= 'disabled' unless params['time'] %>>
   </div>
 
 </div>

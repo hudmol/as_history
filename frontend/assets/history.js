@@ -44,25 +44,27 @@
 	var label = '';
         var uri = '/history';
 	var qs = {};
-	var selected_model = $('select[name=model]').find('option:selected').attr('value');
-	if (selected_model == '_all') {
-	    label = 'Recent updates';
-	} else {
-	    uri += '/' + selected_model;
-	    if ($('input[name=id]').val() == '') {
-		label = 'Recent updates to ' + selected_model + ' records';
+	label = 'Recent updates';
+        if (!$('select[name=model]').is(':disabled')) {
+  	    var selected_model = $('select[name=model]').find('option:selected').attr('value');
+	    if (selected_model == '_all') {
 	    } else {
-		label = 'Revision history for ' + selected_model + ' / ' + $('input[name=id]').val();
-		uri += '/' + $('input[name=id]').val();
+	        uri += '/' + selected_model;
+	        if ($('input[name=id]').is(':disabled') || $('input[name=id]').val() == '') {
+		    label = 'Recent updates to ' + selected_model + ' records';
+	        } else {
+		    label = 'Revision history for ' + selected_model + ' / ' + $('input[name=id]').val();
+		    uri += '/' + $('input[name=id]').val();
+	        }
 	    }
 	}
 
-	if ($('input[name=user]').val() != '') {
+	if (!$('input[name=user]').is(':disabled') && $('input[name=user]').val() != '') {
 	    label += ' by ' + $('input[name=user]').val();
 	    qs['user'] = $('input[name=user]').val();
 	}
 
-	if ($('input[name=time]').val() != '') {
+	if (!$('input[name=time]').is(':disabled') && $('input[name=time]').val() != '') {
 	    label += ' at ' + $('input[name=time]').val();
 	    qs['time'] = $('input[name=time]').val();
 	}
@@ -141,6 +143,22 @@
 
 
 	$('.history-control').on('change keyup paste', function() {
+	    as_history.updateBrowseButton();
+	});
+
+	$('.history-axis-select input[type=checkbox]').on('change', function(e) {
+	    $(this).next().prop('disabled', !$(this).is(':checked'));
+
+	    if ($(this).next().attr('name') == 'model' && $(this).next().is(':disabled')) {
+		$('.history-axis-id input[type=checkbox]').prop('checked', false);
+		$('.history-axis-id input[name=id]').prop('disabled', true);
+	    }
+
+	    if ($(this).next().attr('name') == 'id' && !$(this).next().is(':disabled')) {
+		$('.history-axis-model input[type=checkbox]').prop('checked', true);
+		$('.history-axis-model select[name=model]').prop('disabled', false);
+	    }
+
 	    as_history.updateBrowseButton();
 	});
 
