@@ -347,14 +347,15 @@ class History < Sequel::Model(:history)
     end
 
 
-    def initialize(history, version)
+    def initialize(history, vers)
       @history = history
-      if version.to_i.to_s == version.to_s
-        @version = version
-        @data = _version_or_die(@history.ds.filter(:lock_version => version))
+      if vers.is_a?(Integer)
+        @data = _version_or_die(@history.ds.filter(:lock_version => vers))
+      elsif vers.is_a?(String)
+        @time = n_time = History.normalize_time(vers)
+        @data = _version_or_die(@history.ds.where{user_mtime <= n_time}.reverse(:lock_version))
       else
-        @time = version
-        @data = _version_or_die(@history.ds.where{user_mtime <= version}.reverse(:lock_version))
+        @data = _version_or_die(@history.ds.reverse(:lock_version))
       end
     end
 

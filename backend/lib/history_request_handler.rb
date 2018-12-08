@@ -24,7 +24,7 @@ class HistoryRequestHandler
         history = History.new(model, id)
         [
          history,
-         history.version(version || time || Time.now),
+         history.version(version || time),
          history.versions(filters.reject{|k,v| mode.match(/^f/) && k == :version})
         ]
       else
