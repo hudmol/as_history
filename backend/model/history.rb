@@ -230,16 +230,33 @@ class History < Sequel::Model(:history)
     if reference[:repository]
       repo_id = JSONModel.parse_reference(reference[:repository])[:id]
       RequestContext.open(:repo_id => repo_id) do
-        obj = record_model.get_or_die(record_id)
-        obj.update_from_json(json)
-
-        [obj, json]
+        _handle_restore(record_model, record_id, json)
       end
     else
-      obj = record_model.get_or_die(record_id)
-      obj.update_from_json(json)
+      _handle_restore(record_model, record_id, json)
+    end
+  end
 
+
+  def self._handle_restore(model, id, json)
+    begin
+      obj = model.get_or_die(id)
+      obj.update_from_json(json)
       [obj, json]
+    rescue NotFoundException
+      # a restoring deleted record
+      obj = model.create_from_json(json, {:lock_version => json.lock_version + 1})
+      [obj, json]
+
+      # this retains the old id, but at what cost?!
+#       begin
+#         restricted_model = model.restrict_primary_key?
+#         model.unrestrict_primary_key if restricted_model
+#         obj = model.create_from_json(json, {:id => id, :lock_version => json.lock_version + 1})
+#         [obj, json]
+#       ensure
+#         model.restrict_primary_key if restricted_model
+#       end
     end
   end
 

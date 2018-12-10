@@ -15,6 +15,15 @@ describe 'History' do
       resource
     end
 
+    let!(:deleted_resource) do
+      resource = create(:json_resource,
+                        :title => 'the walking dead')
+
+      resource.delete
+
+      resource
+    end
+
     it 'adds a history list to archival record types' do
       # history will contain a URI for the history record.  Resolve it.
       json = Resource.to_jsonmodel(resource.id)
@@ -37,26 +46,45 @@ describe 'History' do
       expect(Resource.get_or_die(resource.id).title).to eq('the original title')
     end
 
+    it 'restores a version of a deleted record' do
+      (obj, json) = History.restore_version!('resource', deleted_resource.id, 0)
+
+      # ideally, the restored record would have the same id as it previously had
+      # unfortunately this requires undesirable hackery
+      # expect(Resource.get_or_die(deleted_resource.id).title).to eq('the walking dead')
+      expect(Resource.get_or_die(obj.id).title).to eq('the walking dead')
+    end
+
     it 'fetches previous versions' do
-      formatter = HistoryFormatter.new
-      full = formatter.get_version('resource', resource.id, 0, 'json', true, 0)
-      expect(full['title']).to eq('the original title')
+      handler = HistoryRequestHandler.new(:mode => 'json')
+
+      json = handler.get_history('resource', resource.id, 0)
+      expect(json['title']).to eq('the original title')
     end
 
     it 'fetches version metadata' do
-      formatter = HistoryFormatter.new
-      data = formatter.get_version('resource', resource.id, 0, 'data', true, 0)
+      handler = HistoryRequestHandler.new(:mode => 'data')
+
+      data = handler.get_history('resource', resource.id, 0)
       data.values[0][:uri].should eq(resource.uri)
     end
 
-    it 'fetches previous full set (json + version metadata + diff)' do
-      formatter = HistoryFormatter.new
-      full = formatter.get_version('resource', resource.id, 0, 'full', true, 0)
+    it 'fetches a full set of data (json + version metadata + diff + version list)' do
+      handler = HistoryRequestHandler.new(:mode => 'full')
 
-      expect(full[:json]['title']).to eq('the original title')
-      expect(full[:data].length).to eq(1)
+      full = handler.get_history('resource', resource.id, 1)
 
-      expect(full[:diff][:_changes]).to be_empty
+      expect(full.has_key?(:data)).to be(true)
+      expect(full.has_key?(:json)).to be(true)
+      expect(full.has_key?(:diff)).to be(true)
+      expect(full.has_key?(:versions)).to be(true)
+
+      expect(full[:versions].length).to eq(2)
+
+      expect(full[:json]['title']).to eq('a new title')
+
+      expect(full[:diff][:_changes]['title'][:_from]).to eq('the original title')
+      expect(full[:diff][:_changes]['title'][:_to]).to eq('a new title')
       expect(full[:diff][:_adds]).to be_empty
       expect(full[:diff][:_removes]).to be_empty
     end

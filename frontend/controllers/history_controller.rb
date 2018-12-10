@@ -35,10 +35,12 @@ class HistoryController < ApplicationController
     resp = JSONModel::HTTP.post_form("/history/#{params[:model]}/#{params[:id]}/#{params[:version]}/restore")
     if resp.code === "200"
       flash[:success] = I18n.t('plugins.history.restore.success_message')
+      id = JSONModel.parse_reference(ASUtils.json_parse(resp.body)['uri'])[:id]
+      redirect_to(:controller => :history, :action => :record, :model => params[:model], :id => id)
     else
       flash[:error] = I18n.t('plugins.history.restore.error_message', :errors => resp.body)
+      redirect_to(:controller => :history, :action => :record, :model => params[:model], :id => params[:id])
     end
-    redirect_to(:controller => :history, :action => :record, :model => params[:model], :id => params[:id])
   end
 
 
