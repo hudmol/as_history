@@ -161,7 +161,7 @@ class History < Sequel::Model(:history)
 
 
   def self.uri_for_uri_at(time, uri)
-    version = db[:history].filter(:uri => uri).where{user_mtime <= time}.reverse(:user_mtime).first
+    version = db[:history].filter(:uri => uri).where{user_mtime <= time}.reverse(:lock_version).first
     version ? uri(version[:model], version[:record_id], version[:lock_version]) : uri
   end
 
