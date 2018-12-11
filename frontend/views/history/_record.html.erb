@@ -1,4 +1,10 @@
 <%
+  if diff && diff.has_key?('_removes')
+    diff['_removes'].each do |k,v|
+      json[k] = nil
+    end
+  end
+
   json.each do |k,val|
     sct = []
     if diff.is_a?(Hash)
@@ -8,7 +14,6 @@
           sct.push({:class => 'history-diff-field', :value => val})
         elsif diff['_removes'].has_key?(k)
           sct = [{:class => 'history-change history-remove', :value => val, :diff => {'_to' => nil, '_from' => diff['_removes'][k]}}]
-          sct.push({:class => 'history-diff-field', :value => val})
         elsif diff['_changes'].has_key?(k)
           if diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].keys - skip_fields != []
             sct = [{:class => 'history-change history-remove', :value => diff['_changes'][k]['_from'], :diff => diff['_changes'][k]},
@@ -39,7 +44,7 @@
 
       sct.each do |h|
         v = h[:value]
-        unless (v.is_a?(Array) && v.empty?) || skip_fields.include?(k) || (['repository', 'parent'].include?(k) && !top)
+        unless (v.is_a?(Array) && v.empty? && !h[:diff]) || skip_fields.include?(k) || (['repository', 'parent'].include?(k) && !top)
 %>
           <div class="history-field <%= h[:class] %>">
             <span class="history-field-label">
@@ -70,24 +75,30 @@
             </div>
 <%
           elsif v.is_a?(Array)
-            v.zip((h[:diff].is_a?(Array) ? h[:diff] : [])) do |r,d|
-            if r.is_a?(String)
+            da = h[:diff].is_a?(Array) ? h[:diff] : []
+            va = v + (Array.new([da.length - v.length, 0].max))
+            va.zip(da) do |r,d|
+              if r.is_a?(String)
 %>
-              <%= r %>
+                <%= r %>
 <%
-            else
+              else
+                rh = r
+                unless rh
+                  rh = Hash[d['_from'].keys.map{|k| [k, nil]}]
+                end
 %>
-              <div class="history-subrecord">
-                <%= render_aspace_partial :partial => "history/record", :locals => {:json => r, :diff => d, :top => false, :field => k} %>
-              </div>
+                <div class="history-subrecord">
+                  <%= render_aspace_partial :partial => "history/record", :locals => {:json => rh, :diff => d, :top => false, :field => k} %>
+                </div>
 <%
+              end
             end
-          end
-        else
+          else
 %>
-          <%= enum_translator(top ? json['jsonmodel_type'] : field.sub(/s$/,''), k, v) %>
+            <%= enum_translator(top ? json['jsonmodel_type'] : field.sub(/s$/,''), k, (v || h.has_key?(:diff) && h[:diff]['_from'])) %>
 <%
-        end
+          end
 %>
   </div>
 <%
