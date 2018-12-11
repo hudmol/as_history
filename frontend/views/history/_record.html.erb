@@ -95,8 +95,9 @@
               end
             end
           else
+            ev = v.nil? ? (h.has_key?(:diff) ? h[:diff]['_from'] : nil) : v
 %>
-            <%= enum_translator(top ? json['jsonmodel_type'] : field.sub(/s$/,''), k, (v || h.has_key?(:diff) && h[:diff]['_from'])) %>
+            <%= enum_translator(top ? json['jsonmodel_type'] : field.sub(/s$/,''), k, ev) %>
 <%
           end
 %>
