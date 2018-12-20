@@ -417,7 +417,7 @@ class History < Sequel::Model(:history)
           data[:label]
         end
 
-      data[:system_version] = (History.system_version_at(data[:user_mtime])[:label] rescue History::VersionNotFound && nil)
+      data[:system_version] = (History.system_version_at(data[:user_mtime])[:label] rescue History::VersionNotFound && '[UNKNOWN]')
 
       data
     end
