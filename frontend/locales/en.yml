@@ -11,6 +11,7 @@ en:
         system_mtime: Last system update
         user_mtime: Last user update
         uri: URI
+        system_version: System
       title: History
       label: System History
       all_menu_button_label: History - All Recent Updates
