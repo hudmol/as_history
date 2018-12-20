@@ -55,3 +55,27 @@ rescue => e
     end
   end
 end
+
+# a new impl of dump_sanitized that preserves uniqueness
+# unfortunately procs that can't be called (because they need a param,
+# eg. inherit_if) can't be uniquified, so we just sub out the changy bits
+require 'digest/sha1'
+class AppConfig
+  def self.digest
+    protected_terms = /(key|password|secret)/
+    Digest::SHA1.hexdigest(Hash[@@parameters.map {|k, v|
+           if k == :db_url
+             [k, AppConfig[:db_url_redacted]]
+           elsif k.to_s =~ protected_terms or v.to_s =~ protected_terms
+             [k, Digest::SHA1.hexdigest(v.to_s)]
+           elsif v.is_a? (Proc)
+             [k, v.parameters.empty? ? v.call : v.to_s]
+           else
+             [k, v]
+           end
+         }.sort].to_s.gsub(/\#<Proc:[^>]+>/, 'Proc'))
+  end
+end
+
+# determine system version
+History.ensure_system_version

@@ -1,4 +1,5 @@
 require 'zlib'
+require 'digest/sha1'
 
 class History < Sequel::Model(:history)
 
@@ -65,6 +66,57 @@ class History < Sequel::Model(:history)
 
 
   class VersionNotFound < StandardError; end
+
+
+  def self.ensure_system_version
+    config = AppConfig.dump_sanitized
+    config_digest = AppConfig.digest
+
+    begin
+      last_seen = SystemVersion.new
+    rescue VersionNotFound
+      # no records in the system version table - no worries!
+    end
+
+    @current_system_version =
+      if last_seen && last_seen.version == ASConstants.VERSION && last_seen.config_digest == config_digest
+        last_seen
+      else
+        sys_version = {
+          :version => ASConstants.VERSION,
+          :config_digest => config_digest,
+          :first_seen => Time.now,
+          :config => ASUtils.to_json(config),
+        }
+        db[:history_system_version].insert(sys_version)
+        
+        SystemVersion.new
+      end
+  end
+
+
+  def self.current_system_version
+    (@current_system_version || ensure_system_version).data
+  end
+
+
+  def self.system_version_at(time = false)
+    return current_system_version unless time
+    SystemVersion.new(normalize_time(time)).data
+  end
+
+
+  def self.system_version_for(model, id, version)
+    SystemVersion.new(History.new(model, id).version(version).time).data
+  end
+
+
+  def self.system_versions
+    db[:history_system_version]
+      .reverse(:first_seen)
+      .select(*SystemVersion.fields.reject{|f| f == :config})
+      .all.map{|r| SystemVersion.from_row(r)}
+  end
 
 
   def self.ensure_current_versions(objs, jsons)
@@ -185,6 +237,11 @@ class History < Sequel::Model(:history)
   def self.normalize_time(time)
     @date_time_mask ||= '9999-12-31 23:59:59'
     Time.new(*(time + @date_time_mask[time.length .. -1]).split(/[^\d]/)).utc
+  end
+
+
+  def self.localize_times(fields, hash)
+    hash.map{|k,v| [k, fields.include?(k) ? v.getlocal.strftime("%F %T") : v] }.to_h
   end
 
 
@@ -350,7 +407,7 @@ class History < Sequel::Model(:history)
 
     def self.from_row(row)
       # localize the datetime fields
-      data = row.map{|k,v| [k, History.datetime_fields.include?(k) ? v.getlocal.strftime("%F %T") : v] }.to_h
+      data = History.localize_times(History.datetime_fields, row)
 
       # derive a short form of the label
       data[:short_label] = 
@@ -359,6 +416,8 @@ class History < Sequel::Model(:history)
         else
           data[:label]
         end
+
+      data[:system_version] = (History.system_version_at(data[:user_mtime])[:label] rescue History::VersionNotFound && nil)
 
       data
     end
@@ -414,4 +473,46 @@ class History < Sequel::Model(:history)
 
   end
 
+
+  class SystemVersion < Sequel::Model(:history_system_version)
+
+    def self.from_row(row)
+      # localize first_seen
+      hash = History.localize_times([:first_seen], row)
+
+      # parse config
+      if hash[:config]
+        hash[:config] = ASUtils.json_parse(hash[:config])
+      else
+        hash.delete(:config)
+      end
+
+      # label
+      hash[:label] = "#{hash[:version]} [#{hash[:config_digest][0..6]}]"
+
+      hash
+    end
+
+
+    def self.fields
+      @fields ||=
+        [
+         :version,
+         :config_digest,
+         :first_seen,
+         :config,
+        ]
+    end
+
+
+    attr_reader :data
+
+    def initialize(time = false)
+      ds = db[:history_system_version].reverse(:first_seen)
+      ds = ds.where{first_seen <= time} if time
+      raise(History::VersionNotFound.new) unless ds.first
+
+      @data = SystemVersion.from_row(ds.first)
+    end
+  end
 end

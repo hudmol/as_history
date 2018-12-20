@@ -17,6 +17,26 @@ class ArchivesSpaceService < Sinatra::Base
   end
 
 
+  Endpoint.get('/history/system_versions')
+  .description("Get a list of system versions")
+  .params()
+  .permissions([:administer_system])
+  .returns([200, "(system versions)"]) \
+  do
+    json_response(History.system_versions)
+  end
+
+
+  Endpoint.get('/history/system_version')
+  .description("Get a list of system versions")
+  .params(["at", String, "Only show updates at or before the specified date/time", :optional => true],)
+  .permissions([:administer_system])
+  .returns([200, "(system version)"]) \
+  do
+    json_response(History.system_version_at(params[:at]))
+  end
+
+
   Endpoint.get('/history')
   .description("Get recently created versions")
   .params(*COMMON_PARAMS,
@@ -110,6 +130,22 @@ class ArchivesSpaceService < Sinatra::Base
       RequestContext.open(:repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil) do
         json_response({:status => 'Restored', :uri => obj.uri})
       end
+    rescue History::VersionNotFound => e
+      json_response({:error => e}, 404)
+    end
+  end
+
+
+  Endpoint.get('/history/:model/:id/:version/system')
+  .description("Get the system version for the record version")
+  .params(["model", String, "The model"],
+          ["id", Integer, "The ID"],
+          ["version", Integer, "The version to show system version for"])
+  .permissions([:administer_system])
+  .returns([200, "system version"]) \
+  do
+    begin
+      json_response(History.system_version_for(params[:model], params[:id], params[:version]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end
