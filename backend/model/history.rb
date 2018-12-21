@@ -79,7 +79,7 @@ class History < Sequel::Model(:history)
     end
 
     @current_system_version =
-      if last_seen && last_seen.version == ASConstants.VERSION && last_seen.config_digest == config_digest
+      if last_seen && last_seen.data[:version] == ASConstants.VERSION && last_seen.data[:config_digest] == config_digest
         last_seen
       else
         sys_version = {
