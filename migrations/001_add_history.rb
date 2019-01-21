@@ -6,6 +6,7 @@ Sequel.migration do
       String :model, :null => false
       Integer :lock_version, :null => false
 
+      Integer :repo_id, :null => true, :index => true
       String :uri, :null => false, :index => true
       String :label, :null => false
 

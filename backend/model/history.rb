@@ -135,6 +135,8 @@ class History < Sequel::Model(:history)
           :record_id => obj.id,
           :model => obj.class.table_name.to_s,
           :lock_version => obj.lock_version,
+          :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil,
+#          :repo_id => (json[:uri].match(/\/repositories\/(\d+)\//) || [])[1],
           :uri => json[:uri],
           :label => label_for(json),
           :created_by => obj.created_by,
@@ -165,6 +167,7 @@ class History < Sequel::Model(:history)
       :record_id => obj.id,
       :model => obj.class.table_name.to_s,
       :lock_version => obj.lock_version + 1,
+      :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil,
       :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
       :label => label_for(History.version(obj.class.table_name.to_s, obj.id, obj.lock_version).json),
       :created_by => obj.created_by,
@@ -218,8 +221,20 @@ class History < Sequel::Model(:history)
   end
 
 
+# Leaving this here for now as a reminder that we can get the perms here
+# if it turns out to be useful. Not using for now because we probably
+# don't need it and we don't want to spend the extra queries (this has
+# already been done up in controller land)
+#  def self.apply_permissions(dataset)
+#    user = User.find(:username => RequestContext.get(:current_username))
+#    puts "PPPerms  #{user.permissions}"
+#    dataset
+#  end
+
+
   def self.apply_filters(dataset, filters)
     ds = dataset
+#    ds = apply_permissions(ds)
     ds = ds.limit(filters.fetch(:limit, 10)) if filters.has_key?(:limit)
     ds = ds.filter(:model => filters[:model]) if filters.has_key?(:model)
     ds = ds.filter(:last_modified_by => filters[:user]) if filters.has_key?(:user)
