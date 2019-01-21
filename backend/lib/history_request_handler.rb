@@ -1,14 +1,19 @@
 class HistoryRequestHandler
 
-  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit
+  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :only_repos
 
-  def initialize(opts = {})
+  def initialize(current_user, opts = {})
     self.mode =         opts[:mode]  # what data to show
     self.user =         opts[:user]  # only include versions by user
     self.time =         opts[:at]    # only include versions at or before time
     self.convert_uris = opts[:uris]  # convert uris to history equivalents
     self.diff =         opts[:diff]  # the version to diff against
     self.limit =        opts[:limit] # limit the number of versions to show
+
+    unless current_user.can?(:administer_system)
+      self.only_repos = current_user.permissions.select{|k,v| v.include?('view_repository')}.keys.map{|uri| uri.split('/')[-1].to_i}
+#      self.view_supp = current_user.permissions.select{|k,v| v.include?('view_suppressed')}.keys.map{|uri| uri.split('/')[-1].to_i}
+    end
   end
 
 
@@ -21,14 +26,16 @@ class HistoryRequestHandler
 
     (history, version, list) =
       if model && id
-        history = History.new(model, id)
+        history = History.new(model, id, only_repos)
         [
          history,
          history.version(version || time),
          history.versions(filters.reject{|k,v| mode.match(/^f/) && k == :version})
         ]
       else
-        versions = History.versions(model, id, filters.merge(:mode => 'list'))
+        filters[:mode] = 'list'
+        filters[:only_repos] = only_repos if only_repos
+        versions = History.versions(model, id, filters)
         latest = versions.values.first
         history = History.new(latest[:model], latest[:record_id])
         [

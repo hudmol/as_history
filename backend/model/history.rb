@@ -221,20 +221,15 @@ class History < Sequel::Model(:history)
   end
 
 
-# Leaving this here for now as a reminder that we can get the perms here
-# if it turns out to be useful. Not using for now because we probably
-# don't need it and we don't want to spend the extra queries (this has
-# already been done up in controller land)
-#  def self.apply_permissions(dataset)
-#    user = User.find(:username => RequestContext.get(:current_username))
-#    puts "PPPerms  #{user.permissions}"
-#    dataset
-#  end
+  def self.apply_permissions(dataset, filters)
+    ds = dataset
+    ds = ds.where{{repo_id: nil} | {repo_id: filters[:only_repos]}} if filters.has_key?(:only_repos)
+    ds
+  end
 
 
   def self.apply_filters(dataset, filters)
-    ds = dataset
-#    ds = apply_permissions(ds)
+    ds = apply_permissions(dataset, filters)
     ds = ds.limit(filters.fetch(:limit, 10)) if filters.has_key?(:limit)
     ds = ds.filter(:model => filters[:model]) if filters.has_key?(:model)
     ds = ds.filter(:last_modified_by => filters[:user]) if filters.has_key?(:user)
@@ -262,7 +257,7 @@ class History < Sequel::Model(:history)
 
   def self.versions(model, id, filters = {})
     if model && id
-      History.new(model, id).versions(filters)
+      History.new(model, id, filters[:only_repos]).versions(filters)
     elsif model
       History.latest(filters.merge(:model => model))
     else
@@ -335,10 +330,11 @@ class History < Sequel::Model(:history)
 
   attr_reader :ds
 
-  def initialize(model, id)
+  def initialize(model, id, only_repos = false)
     @model = model
     @id = id
     @ds = db[:history].filter(:model => @model, :record_id => @id)
+    @ds = @ds.filter(:repo_id => only_repos) if only_repos
     raise VersionNotFound.new if @ds.empty?
   end
 

@@ -29,7 +29,7 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.get('/history/system_version')
   .description("Get a list of system versions")
-  .params(["at", String, "Only show updates at or before the specified date/time", :optional => true],)
+  .params(["at", String, "Only show updates at or before the specified date/time", :optional => true])
   .permissions([:administer_system])
   .returns([200, "(system version)"]) \
   do
@@ -42,10 +42,10 @@ class ArchivesSpaceService < Sinatra::Base
   .params(*COMMON_PARAMS,
           ["limit", Integer, "How many to show", :default => 10],
           ["mode", String, "What data to return - list, json, data, full", :default => 'list'])
-  .permissions([:view_all_records])
+  .permissions([])
   .returns([200, "versions"]) \
   do
-    handler = HistoryRequestHandler.new(params)
+    handler = HistoryRequestHandler.new(current_user, params)
 
     begin
       json_response(handler.get_history)
@@ -61,10 +61,10 @@ class ArchivesSpaceService < Sinatra::Base
           ["model", String, "The model"],
           ["limit", Integer, "How many to show", :default => 10],
           ["mode", String, "What data to return - list, json, data, full", :default => 'list'])
-  .permissions([:view_all_records])
+  .permissions([])
   .returns([200, "history"]) \
   do
-    handler = HistoryRequestHandler.new(params)
+    handler = HistoryRequestHandler.new(current_user, params)
 
     begin
       json_response(handler.get_history(params[:model]))
@@ -81,10 +81,10 @@ class ArchivesSpaceService < Sinatra::Base
           ["id", Integer, "The ID"],
           ["mode", String, "What data to return - list, json, data, full", :default => 'list'],
           ["limit", Integer, "How many to show", :optional => true])
-  .permissions([:view_all_records])
+  .permissions([])
   .returns([200, "history"]) \
   do
-    handler = HistoryRequestHandler.new(params)
+    handler = HistoryRequestHandler.new(current_user, params)
 
     begin
       json_response(handler.get_history(params[:model], params[:id]))
@@ -103,10 +103,10 @@ class ArchivesSpaceService < Sinatra::Base
           ["mode", String, "What data to return - json (default), data, full", :default => 'json'],
           ["diff", Integer, "The version to diff from in full mode", :optional => true],
           ["limit", Integer, "How many to show", :optional => true])
-  .permissions([:view_all_records])
+  .permissions([])
   .returns([200, "version"]) \
   do
-    handler = HistoryRequestHandler.new(params)
+    handler = HistoryRequestHandler.new(current_user, params)
 
     begin
       json_response(handler.get_history(params[:model], params[:id], params[:version]))
@@ -158,7 +158,7 @@ class ArchivesSpaceService < Sinatra::Base
           ["id", Integer, "The ID"],
           ["a", Integer, "The 'a' version"],
           ["b", Integer, "The 'b' version"])
-  .permissions([:view_all_records])
+  .permissions([])
   .returns([200, "version diff"]) \
   do
     begin
