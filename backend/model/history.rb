@@ -334,7 +334,7 @@ class History < Sequel::Model(:history)
     @model = model
     @id = id
     @ds = db[:history].filter(:model => @model, :record_id => @id)
-    @ds = @ds.filter(:repo_id => only_repos) if only_repos
+    @ds = History.apply_permissions(@ds, {:only_repos => only_repos}) if only_repos
     raise VersionNotFound.new if @ds.empty?
   end
 
@@ -458,6 +458,10 @@ class History < Sequel::Model(:history)
 
     def time
       @data[:user_mtime]
+    end
+
+    def uri
+      @data[:uri]
     end
 
     def json(convert_uris = true)

@@ -121,15 +121,13 @@ class ArchivesSpaceService < Sinatra::Base
   .params(["model", String, "The model"],
           ["id", Integer, "The ID"],
           ["version", Integer, "The version to restore"])
-  .permissions([:administer_system])
+  .permissions([])
   .returns([200, "version"]) \
   do
-    begin
-      (obj, json) = History.restore_version!(params[:model], params[:id], params[:version])
+    handler = HistoryRequestHandler.new(current_user, params)
 
-      RequestContext.open(:repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil) do
-        json_response({:status => 'Restored', :uri => obj.uri})
-      end
+    begin
+      json_response(handler.restore_version!(params[:model], params[:id], params[:version]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end

@@ -1,6 +1,6 @@
 class HistoryRequestHandler
 
-  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :only_repos
+  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :admin, :permissions, :only_repos
 
   def initialize(current_user, opts = {})
     self.mode =         opts[:mode]  # what data to show
@@ -10,7 +10,10 @@ class HistoryRequestHandler
     self.diff =         opts[:diff]  # the version to diff against
     self.limit =        opts[:limit] # limit the number of versions to show
 
-    unless current_user.can?(:administer_system)
+    self.admin = current_user.can?(:administer_system)
+    self.permissions = current_user.permissions
+
+    unless admin
       self.only_repos = current_user.permissions.select{|k,v| v.include?('view_repository')}.keys.map{|uri| uri.split('/')[-1].to_i}
 #      self.view_supp = current_user.permissions.select{|k,v| v.include?('view_suppressed')}.keys.map{|uri| uri.split('/')[-1].to_i}
     end
@@ -63,6 +66,28 @@ class HistoryRequestHandler
         :versions => list,
       }
 
+    end
+  end
+
+
+  def restore_version!(model, id, version)
+    # Make sure the user is allowed to update this record
+    unless admin
+      record_uri = History.new(model, id, only_repos).version(version).uri
+      restore_perms = ArchivesSpaceService::Endpoint.permissions_for(:post, record_uri).map(&:to_s)
+      perm_key = if (uri_match = record_uri.match(/^\/repositories\/\d+/))
+                   uri_match[0]
+                 else
+                   '_archivesspace'
+                 end
+
+      raise AccessDeniedException.new("Access denied") if ((permissions[perm_key] || []) & restore_perms).empty?
+    end
+
+    (obj, json) = History.restore_version!(model, id, version)
+
+    RequestContext.open(:repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil) do
+      {:status => 'Restored', :uri => obj.uri}
     end
   end
 
