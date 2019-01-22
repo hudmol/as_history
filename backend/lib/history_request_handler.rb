@@ -70,6 +70,11 @@ class HistoryRequestHandler
   end
 
 
+  def diff(model, id, a, b)
+    History.diff(model, id, a, b, only_repos)
+  end
+
+
   def restore_version!(model, id, version)
     # Make sure the user is allowed to update this record
     unless admin

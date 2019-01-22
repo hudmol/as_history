@@ -282,8 +282,8 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.diff(model, id, a, b)
-    History.new(model, id).diff(a, b)
+  def self.diff(model, id, a, b, only_repos = false)
+    History.new(model, id, only_repos).diff(a, b)
   end
 
 

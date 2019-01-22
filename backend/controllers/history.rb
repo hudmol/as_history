@@ -159,8 +159,10 @@ class ArchivesSpaceService < Sinatra::Base
   .permissions([])
   .returns([200, "version diff"]) \
   do
+    handler = HistoryRequestHandler.new(current_user, params)
+
     begin
-      json_response(History.diff(params[:model], params[:id], params[:a], params[:b]))
+      json_response(handler.diff(params[:model], params[:id], params[:a], params[:b]))
     rescue History::VersionNotFound => e
       json_response({:error => e}, 404)
     end
