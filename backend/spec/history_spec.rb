@@ -46,6 +46,15 @@ describe 'History' do
       expect(Resource.get_or_die(resource.id).title).to eq('the original title')
     end
 
+    it 'will not restore a version of a record if the user lacks update permissions' do
+      create_nobody_user
+
+      as_test_user('nobody') do
+        handler = HistoryRequestHandler.new(Thread.current[:active_test_user])
+        expect{handler.restore_version!('resource', resource.id, 0)}.to raise_error(AccessDeniedException)
+      end
+    end
+
     it 'restores a version of a deleted record' do
       (obj, json) = History.restore_version!('resource', deleted_resource.id, 0)
 
