@@ -56,21 +56,21 @@ describe 'History' do
     end
 
     it 'fetches previous versions' do
-      handler = HistoryRequestHandler.new(:mode => 'json')
+      handler = HistoryRequestHandler.new(Thread.current[:active_test_user], {:mode => 'json'})
 
       json = handler.get_history('resource', resource.id, 0)
       expect(json['title']).to eq('the original title')
     end
 
     it 'fetches version metadata' do
-      handler = HistoryRequestHandler.new(:mode => 'data')
+      handler = HistoryRequestHandler.new(Thread.current[:active_test_user], {:mode => 'data'})
 
       data = handler.get_history('resource', resource.id, 0)
       data.values[0][:uri].should eq(resource.uri)
     end
 
     it 'fetches a full set of data (json + version metadata + diff + version list)' do
-      handler = HistoryRequestHandler.new(:mode => 'full')
+      handler = HistoryRequestHandler.new(Thread.current[:active_test_user], {:mode => 'full'})
 
       full = handler.get_history('resource', resource.id, 1)
 

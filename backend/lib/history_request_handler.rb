@@ -70,7 +70,7 @@ class HistoryRequestHandler
   end
 
 
-  def diff(model, id, a, b)
+  def diff_versions(model, id, a, b)
     History.diff(model, id, a, b, only_repos)
   end
 
