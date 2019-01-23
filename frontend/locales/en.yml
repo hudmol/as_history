@@ -36,6 +36,8 @@ en:
           with values from the restored version.
         not_from_recent_help: |
           Restore is not supported from a recent view. Go to the record view to restore a previous version.
+        access_denied_help: |
+          You do not have permission to restore this version.
         success_message: Version successfully restored
         error_message: "Restore failed: %{errors}"
       in_a_rush:

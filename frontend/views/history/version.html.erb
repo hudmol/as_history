@@ -52,7 +52,7 @@
 
       <div class="record-pane history-record-pane">
         <%= render_aspace_partial :partial => "history/audit_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
-        <%= render_aspace_partial :partial => "history/restore_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version']} %>
+        <%= render_aspace_partial :partial => "history/restore_dialog", :locals => {:current_version => @version['versions'].values.first['lock_version'], :can_restore => @version['can_restore']} %>
         <%= render_aspace_partial :partial => "shared/flash_messages" %>
 
         <h4><%= data['label'] %></h4>

@@ -328,7 +328,7 @@ class History < Sequel::Model(:history)
   end
 
 
-  attr_reader :ds
+  attr_reader :ds, :model, :id
 
   def initialize(model, id, only_repos = false)
     @model = model

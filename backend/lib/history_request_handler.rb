@@ -63,6 +63,7 @@ class HistoryRequestHandler
         :data => version.data,
         :json => version.json(convert_uris),
         :diff => (history.diff(version.version, diff || version.version - 1) rescue History::VersionNotFound && nil),
+        :can_restore => can_restore?(history.model, history.id, version.version),
         :versions => list,
       }
 
@@ -75,19 +76,23 @@ class HistoryRequestHandler
   end
 
 
-  def restore_version!(model, id, version)
-    # Make sure the user is allowed to update this record
-    unless admin
-      record_uri = History.new(model, id, only_repos).version(version).uri
-      restore_perms = ArchivesSpaceService::Endpoint.permissions_for(:post, record_uri).map(&:to_s)
-      perm_key = if (uri_match = record_uri.match(/^\/repositories\/\d+/))
-                   uri_match[0]
-                 else
-                   '_archivesspace'
-                 end
+  def can_restore?(model, id, version)
+    return true if admin
 
-      raise AccessDeniedException.new("Access denied") if ((permissions[perm_key] || []) & restore_perms).empty?
-    end
+    record_uri = History.new(model, id, only_repos).version(version).uri
+    restore_perms = ArchivesSpaceService::Endpoint.permissions_for(:post, record_uri).map(&:to_s)
+    perm_key = if (uri_match = record_uri.match(/^\/repositories\/\d+/))
+                 uri_match[0]
+               else
+                 '_archivesspace'
+               end
+
+    ((permissions[perm_key] || []) & restore_perms).length > 0
+  end
+
+
+  def restore_version!(model, id, version)
+    raise AccessDeniedException.new("Access denied") unless can_restore?(model, id, version)
 
     (obj, json) = History.restore_version!(model, id, version)
 

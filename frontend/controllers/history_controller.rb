@@ -1,7 +1,6 @@
 class HistoryController < ApplicationController
 
-  set_access_control  "view_all_records" => [:index, :record, :version],
-                      "administer_system" => [:restore]
+  set_access_control  :public => [:index, :record, :version, :restore]
 
   def index
     @title = "History | Recent updates"
