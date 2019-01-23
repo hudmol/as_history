@@ -50,6 +50,14 @@ rescue => e
   end
 
   class StatCounter
+    def initialize(*args)
+      Log.debug("asam not active, so ignoring")
+    end
+
+    def method_missing(meth, *args)
+      Log.debug("asam not active, so ignoring: StatCounter: ##{meth}(#{args.join(', ')})")
+    end
+
     def self.method_missing(meth, *args)
       Log.debug("asam not active, so ignoring: StatCounter: ##{meth}(#{args.join(', ')})")
     end
