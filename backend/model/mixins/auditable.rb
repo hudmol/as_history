@@ -13,6 +13,19 @@ module Auditable
   end
 
 
+  def set_suppressed(val)
+    super
+
+    object_graph = self.object_graph
+
+    object_graph.each do |model, ids_to_change|
+      History.handle_suppression(model, ids_to_change, val)
+    end
+
+    val
+  end
+
+
   module ClassMethods
     def sequel_to_jsonmodel(objs, opts = {})
       jsons = super

@@ -3,10 +3,8 @@ require 'digest/sha1'
 
 class History < Sequel::Model(:history)
 
-  @@models = []
-
   def self.register_model(model)
-    @@models.push(model)
+    models.push(model)
 
     model.my_jsonmodel.schema['properties']['history'] = {
       'type' => 'object',
@@ -22,6 +20,7 @@ class History < Sequel::Model(:history)
   end
 
   def self.models
+    @@models ||= []
     @@models
   end
 
@@ -135,10 +134,10 @@ class History < Sequel::Model(:history)
           :record_id => obj.id,
           :model => obj.class.table_name.to_s,
           :lock_version => obj.lock_version,
-          :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil,
-#          :repo_id => (json[:uri].match(/\/repositories\/(\d+)\//) || [])[1],
+          :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
           :uri => json[:uri],
           :label => label_for(json),
+          :suppressed => json[:suppressed] ? 1 : 0,
           :created_by => obj.created_by,
           :last_modified_by => obj.last_modified_by,
           :create_time => obj.create_time,
@@ -167,9 +166,10 @@ class History < Sequel::Model(:history)
       :record_id => obj.id,
       :model => obj.class.table_name.to_s,
       :lock_version => obj.lock_version + 1,
-      :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : nil,
+      :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
       :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
       :label => label_for(History.version(obj.class.table_name.to_s, obj.id, obj.lock_version).json),
+      :suppressed => json[:suppressed] ? 1 : 0,
       :created_by => obj.created_by,
       :last_modified_by => obj.last_modified_by,
       :create_time => obj.create_time,
@@ -181,6 +181,15 @@ class History < Sequel::Model(:history)
     self.insert(hist)
 
     update_status(hist)
+  end
+
+
+  def self.handle_suppression(model, ids, val)
+    if models.include?(model)
+      db[:history].filter(:model => model.table_name.to_s)
+        .filter(:record_id => ids)
+        .update(:suppressed => val ? 1 : 0)
+    end
   end
 
 
@@ -221,15 +230,18 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.apply_permissions(dataset, filters)
+  def self.apply_scope(dataset, filters)
     ds = dataset
-    ds = ds.where{{repo_id: nil} | {repo_id: filters[:only_repos]}} if filters.has_key?(:only_repos)
+    if filters.has_key?(:scope)
+      ds = ds.where{{:suppressed => 0} | {1 => filters[:scope][:view_suppressed]} | {:repo_id => filters[:scope][:view_suppressed]}}
+      ds = ds.where{{:repo_id => 0} | {1 => filters[:scope][:view_repository]} | {:repo_id => filters[:scope][:view_repository]}}
+    end
     ds
   end
 
 
   def self.apply_filters(dataset, filters)
-    ds = apply_permissions(dataset, filters)
+    ds = apply_scope(dataset, filters)
     ds = ds.limit(filters.fetch(:limit, 10)) if filters.has_key?(:limit)
     ds = ds.filter(:model => filters[:model]) if filters.has_key?(:model)
     ds = ds.filter(:last_modified_by => filters[:user]) if filters.has_key?(:user)
@@ -257,7 +269,7 @@ class History < Sequel::Model(:history)
 
   def self.versions(model, id, filters = {})
     if model && id
-      History.new(model, id, filters[:only_repos]).versions(filters)
+      History.new(model, id, filters[:scope]).versions(filters)
     elsif model
       History.latest(filters.merge(:model => model))
     else
@@ -282,8 +294,8 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.diff(model, id, a, b, only_repos = false)
-    History.new(model, id, only_repos).diff(a, b)
+  def self.diff(model, id, a, b, scope = false)
+    History.new(model, id, scope).diff(a, b)
   end
 
 
@@ -330,11 +342,11 @@ class History < Sequel::Model(:history)
 
   attr_reader :ds, :model, :id
 
-  def initialize(model, id, only_repos = false)
+  def initialize(model, id, scope = false)
     @model = model
     @id = id
     @ds = db[:history].filter(:model => @model, :record_id => @id)
-    @ds = History.apply_permissions(@ds, {:only_repos => only_repos}) if only_repos
+    @ds = History.apply_scope(@ds, {:scope => scope}) if scope
     raise VersionNotFound.new if @ds.empty?
   end
 

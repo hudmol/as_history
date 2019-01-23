@@ -1,6 +1,6 @@
 class HistoryRequestHandler
 
-  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :admin, :permissions, :only_repos
+  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :admin, :permissions, :scope
 
   def initialize(current_user, opts = {})
     self.mode =         opts[:mode]  # what data to show
@@ -13,10 +13,19 @@ class HistoryRequestHandler
     self.admin = current_user.can?(:administer_system)
     self.permissions = current_user.permissions
 
-    unless admin
-      self.only_repos = current_user.permissions.select{|k,v| v.include?('view_repository')}.keys.map{|uri| uri.split('/')[-1].to_i}
-#      self.view_supp = current_user.permissions.select{|k,v| v.include?('view_suppressed')}.keys.map{|uri| uri.split('/')[-1].to_i}
-    end
+    # this contains lists of repo_ids for viewing records and viewing suppressed records
+    self.scope = {}
+
+    scope[:view_repository] = current_user.permissions
+      .select{|k,v| v.include?('view_repository')}
+      .keys.map{|uri| uri.split('/')[-1].to_i}
+
+    # for the global '_archivesspace' repo, we end up with 0 (from the .to_i)
+    # this is good because it simplifies the suppression filter
+    # history records for global models have a repo_id of 0
+    scope[:view_suppressed] = current_user.permissions
+      .select{|k,v| v.include?('view_suppressed')}
+      .keys.map{|uri| uri.split('/')[-1].to_i}
   end
 
 
@@ -29,7 +38,7 @@ class HistoryRequestHandler
 
     (history, version, list) =
       if model && id
-        history = History.new(model, id, only_repos)
+        history = History.new(model, id, scope)
         [
          history,
          history.version(version || time),
@@ -37,7 +46,7 @@ class HistoryRequestHandler
         ]
       else
         filters[:mode] = 'list'
-        filters[:only_repos] = only_repos if only_repos
+        filters[:scope] = scope
         versions = History.versions(model, id, filters)
         latest = versions.values.first
         history = History.new(latest[:model], latest[:record_id])
@@ -72,14 +81,14 @@ class HistoryRequestHandler
 
 
   def diff_versions(model, id, a, b)
-    History.diff(model, id, a, b, only_repos)
+    History.diff(model, id, a, b, scope)
   end
 
 
   def can_restore?(model, id, version)
     return true if admin
 
-    record_uri = History.new(model, id, only_repos).version(version).uri
+    record_uri = History.new(model, id, scope).version(version).uri
     restore_perms = ArchivesSpaceService::Endpoint.permissions_for(:post, record_uri).map(&:to_s)
     perm_key = if (uri_match = record_uri.match(/^\/repositories\/\d+/))
                  uri_match[0]
