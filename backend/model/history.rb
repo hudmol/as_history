@@ -169,7 +169,7 @@ class History < Sequel::Model(:history)
       :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
       :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
       :label => label_for(History.version(obj.class.table_name.to_s, obj.id, obj.lock_version).json),
-      :suppressed => json[:suppressed] ? 1 : 0,
+      :suppressed => obj.suppressed,
       :created_by => obj.created_by,
       :last_modified_by => obj.last_modified_by,
       :create_time => obj.create_time,
