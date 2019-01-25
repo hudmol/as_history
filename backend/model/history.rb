@@ -327,11 +327,9 @@ class History < Sequel::Model(:history)
     begin
       obj = model.get_or_die(id)
       obj.update_from_json(json)
-      [obj, json]
     rescue NotFoundException
       # a restoring deleted record
       obj = model.create_from_json(json, {:lock_version => json.lock_version + 1})
-      [obj, json]
 
       # this retains the old id, but at what cost?!
 #       begin
@@ -342,7 +340,12 @@ class History < Sequel::Model(:history)
 #       ensure
 #         model.restrict_primary_key if restricted_model
 #       end
+
+      # remove the record's tombstone
+      Tombstone.filter(:uri => json[:uri]).delete
     end
+
+    [obj, json]
   end
 
 

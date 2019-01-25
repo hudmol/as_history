@@ -62,6 +62,8 @@ describe 'History' do
       # unfortunately this requires undesirable hackery
       # expect(Resource.get_or_die(deleted_resource.id).title).to eq('the walking dead')
       expect(Resource.get_or_die(obj.id).title).to eq('the walking dead')
+
+      expect(Tombstone.filter(:uri => json[:uri]).count).to eq(0) 
     end
 
     it 'fetches previous versions' do
