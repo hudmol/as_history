@@ -87,6 +87,7 @@ describe 'History' do
       expect(full.has_key?(:json)).to be(true)
       expect(full.has_key?(:diff)).to be(true)
       expect(full.has_key?(:versions)).to be(true)
+      expect(full.has_key?(:can_restore)).to be(true)
 
       expect(full[:versions].length).to eq(2)
 
@@ -96,6 +97,8 @@ describe 'History' do
       expect(full[:diff][:_changes]['title'][:_to]).to eq('a new title')
       expect(full[:diff][:_adds]).to be_empty
       expect(full[:diff][:_removes]).to be_empty
+
+      expect(full[:can_restore]).to eq(true)
     end
 
   end
