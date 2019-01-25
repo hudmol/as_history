@@ -96,7 +96,7 @@ class HistoryRequestHandler
                  '_archivesspace'
                end
 
-    ((permissions[perm_key] || []) & restore_perms).length > 0
+    ((permissions[perm_key] || []) & restore_perms).length == restore_perms.length
   end
 
 
