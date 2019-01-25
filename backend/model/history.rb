@@ -162,13 +162,19 @@ class History < Sequel::Model(:history)
   def self.record_delete(obj)
     uri_hash = obj.respond_to?(:repo_id) ? {:repo_id => obj.repo_id} : {}
 
+    # deletion does not respect lock_version, so we can't trust `obj`
+    # to have the current lock_version. so we ask history to just
+    # give us the latest version
+    latest_version = History.new(obj.class.table_name.to_s, obj.id).version
+    label = label_for(latest_version.json)
+
     hist = {
       :record_id => obj.id,
       :model => obj.class.table_name.to_s,
-      :lock_version => obj.lock_version + 1,
+      :lock_version => latest_version.version + 1,
       :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
       :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
-      :label => label_for(History.new(obj.class.table_name.to_s, obj.id).version(obj.lock_version).json),
+      :label => label,
       :suppressed => obj.respond_to?(:suppressed) ? obj.suppressed : 0,
       :created_by => obj.created_by,
       :last_modified_by => obj.last_modified_by,
@@ -362,7 +368,7 @@ class History < Sequel::Model(:history)
   end
 
 
-  def version(version)
+  def version(version = nil)
     Version.new(self, version)
   end
 
@@ -446,7 +452,7 @@ class History < Sequel::Model(:history)
     end
 
 
-    def initialize(history, vers)
+    def initialize(history, vers = nil)
       @history = history
       if vers.is_a?(Integer)
         @data = _version_or_die(@history.ds.filter(:lock_version => vers))
