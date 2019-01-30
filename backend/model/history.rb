@@ -143,7 +143,7 @@ class History < Sequel::Model(:history)
           :create_time => obj.create_time,
           :system_mtime => obj.system_mtime,
           :user_mtime => obj.user_mtime,
-          :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json))),
+          :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json.to_hash(:trusted)))),
         }
 
         begin
