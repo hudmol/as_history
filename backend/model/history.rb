@@ -44,6 +44,7 @@ class History < Sequel::Model(:history)
   def self.audit_fields
     @@audit_fields ||=
       [
+       :jsonmodel_type,
        :lock_version,
        :created_by,
        :last_modified_by,
@@ -414,7 +415,96 @@ class History < Sequel::Model(:history)
   end
 
 
+  def inline_diff(a, b)
+    from_json = version([a,b].min).json(false)
+    return from_json if a == b
+    to_json = version([a,b].max).json(false)
+
+    inline_hash_diff(from_json, to_json)
+  end
+
+
   private
+
+  def without_audit(hash)
+    return hash unless hash.is_a?(Hash)
+    hash.select{|k,v| !History.audit_fields.include?(k.intern)}
+  end
+
+
+  def inline_hash_diff(a, b)
+    out = {}
+    zip_align(without_audit(a).keys, without_audit(b).keys).each do |a_key, b_key|
+      the_key = a_key || b_key
+
+      if a_key && b_key
+        if a[a_key].is_a? Hash
+          out[a_key] = inline_hash_diff(a[a_key], b[b_key])
+        elsif a[a_key].is_a? Array
+          aa = a[a_key] + (Array.new([b[b_key].length - a[a_key].length, 0].max))
+          aa.zip(b[b_key]).each do |av, bv|
+            out[a_key] ||= []
+            if av && bv
+              out[a_key].push(inline_hash_diff(av, bv))
+            elsif av
+              out[a_key].push({'_diff' => [without_audit(av), nil]})
+            else
+              out[a_key].push({'_diff' => [nil, without_audit(bv)]})
+            end
+          end
+        else
+          if a[a_key] == b[b_key]
+            out[a_key] = a[a_key]
+          else
+            out[a_key] = {'_diff' => [a[a_key], b[b_key]]}
+          end
+        end
+      elsif a_key
+        out[a_key] = {'_diff' => [without_audit(a[a_key]), nil]}
+      else
+        out[b_key] = {'_diff' => [nil, without_audit(b[b_key])]}
+      end
+    end
+
+    out
+  end
+
+
+  def zip_align(a, b)
+    out = []
+    ax = bx = 0
+
+    (a & b).each do |sv|
+      (ax..a.index(sv)-1).each do |ix|
+        out.push([a[ix], nil])
+        ax += 1
+      end
+
+      (bx..b.index(sv)-1).each do |ix|
+        out.push([nil, b[ix]])
+        bx += 1
+      end
+
+      out.push([sv,sv])
+      ax += 1
+      bx += 1
+    end
+
+    (ax..a.length-1).each do |ix|
+      out.push([a[ix], nil])
+      ax += 1
+    end
+
+    (bx..b.length-1).each do |ix|
+      out.push([nil, b[ix]])
+      bx += 1
+    end
+
+    out
+  end
+
+
+
 
   def _nested_hash_diff(from, to)
     out = {}
