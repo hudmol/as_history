@@ -1,0 +1,21 @@
+<% hash.each do |k,v| %>
+
+  <% if is_diff(v) %>
+    <% ['remove', 'add'].zip(diff_values(v)).each do |type, val| %>
+      <% unless val.nil? %>
+        <%= render_aspace_partial :partial => 'history/diffed_field', :locals => {:type => type, :field => field, :key => k, :value => val} %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <% unless to_value(v).nil? %>
+    <%= render_aspace_partial :partial => 'history/diffed_field', :locals => {:type => 'clean', :field => field, :key => k, :value => to_value(v)} %>
+  <% end %>
+
+<% end %>
+
+
+
+<%# (rendered, has_clean, has_diff) = render_inline_diff(@version['inline_diff']) %>
+<%# rendered %>
+

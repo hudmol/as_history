@@ -1,0 +1,34 @@
+
+<%
+classes = if type == 'clean'
+            'history-clean-field'
+          else
+            'history-change ' + (type == 'add' ? 'history-add' : 'history-remove')
+          end
+%> 
+
+<div class="history-field <%= classes %>">
+  <span class="history-field-label">
+<%
+    if field
+      label = t(field.sub(/s$/,'') + '.' + key)
+    else
+      label = t(data['model'] + '.' + key)
+    end
+    label = (label[:_plural] || key) if label.is_a?(Hash)
+%>
+    <%= label %>:
+  </span>
+
+
+  <% if value.is_a?(Array) %>
+    <% value.each do |av| %>
+      (rendered, has_clean, has_diff) = render_inline_diff(av, k)
+    <% end %>
+  <% end %>
+
+
+
+  <%= value %>
+</div>
+

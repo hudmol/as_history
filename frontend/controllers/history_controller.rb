@@ -178,4 +178,34 @@ class HistoryController < ApplicationController
     label
   end
 
+
+  helper_method :is_diff
+  def is_diff(value, with_add = false)
+    (value.is_a?(Hash) && value.has_key?('_diff')) && (!with_add || !value['_diff'][1].nil?)
+  end
+
+
+  helper_method :diff_values
+  def diff_values(value)
+    return [value, value] unless is_diff(value)
+    value['_diff']
+  end
+
+
+  helper_method :to_value
+  def to_value(value)
+    diff_values(value)[1]
+  end
+
+
+  helper_method :render_inline_diff
+  def render_inline_diff(hash, field = false)
+    has_clean = hash.any?{|k,v| !is_diff(v) || is_diff(v, true)}
+    has_diff = hash.any?{|k,v| is_diff(v)}
+
+    rendered = render_aspace_partial(:partial => "history/inline_diff", :locals => {:hash => hash, :field => field})
+#    rendered = render_aspace_partial(:partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true})
+
+    [rendered, has_clean, has_diff]
+  end
 end

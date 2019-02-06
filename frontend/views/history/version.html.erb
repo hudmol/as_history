@@ -57,7 +57,11 @@
 
         <h4><%= data['label'] %></h4>
 
-        <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
+        <%# render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
+
+        <% (rendered, has_clean, has_diff) = render_inline_diff(@version['inline_diff']) %>
+        <%= rendered %>
+
       </div>
 
     </div>
