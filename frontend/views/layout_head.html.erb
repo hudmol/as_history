@@ -1,4 +1,4 @@
-<%= stylesheet_link_tag "#{AppConfig[:frontend_prefix]}assets/history.css" %>
+<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/history.css" %>
 
 <script>
  var HISTORY_IN_A_RUSH_TRANSLATIONS = <%== ASUtils.to_json(I18n.backend.send(:translations)[I18n.locale][:plugins][:history][:in_a_rush]) %>;

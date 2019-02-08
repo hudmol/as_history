@@ -29,7 +29,7 @@
       <% end %>
 
       <%= link_to button_label,
-                  File.join(AppConfig[:frontend_prefix], uri).to_s,
+                  File.join(AppConfig[:frontend_proxy_prefix], uri).to_s,
                   :class => "btn btn-default history-version #{showing}" %>
     </div>
     <% last_ver = ver %>
