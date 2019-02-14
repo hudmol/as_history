@@ -11,19 +11,20 @@ class HistoryRequestHandler
     self.limit =        opts[:limit] # limit the number of versions to show
 
     self.admin = current_user.can?(:administer_system)
-    self.permissions = current_user.permissions
+    # the anonymous user, strangely, doesn't respond to permissions
+    self.permissions = current_user.respond_to?(:permissions) ? current_user.permissions : {}
 
     # this contains lists of repo_ids for viewing records and viewing suppressed records
     self.scope = {}
 
-    scope[:view_repository] = current_user.permissions
+    scope[:view_repository] = permissions
       .select{|k,v| v.include?('view_repository')}
       .keys.map{|uri| uri.split('/')[-1].to_i}
 
     # for the global '_archivesspace' repo, we end up with 0 (from the .to_i)
     # this is good because it simplifies the suppression filter
     # history records for global models have a repo_id of 0
-    scope[:view_suppressed] = current_user.permissions
+    scope[:view_suppressed] = permissions
       .select{|k,v| v.include?('view_suppressed')}
       .keys.map{|uri| uri.split('/')[-1].to_i}
   end
