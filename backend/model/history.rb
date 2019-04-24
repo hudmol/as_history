@@ -41,8 +41,8 @@ class History < Sequel::Model(:history)
       ]
   end
 
-  def self.audit_fields
-    @@audit_fields ||=
+  def self.diff_skip_fields
+    @@diff_skip_fields ||=
       [
        :jsonmodel_type,
        :lock_version,
@@ -53,6 +53,11 @@ class History < Sequel::Model(:history)
        :user_mtime,
       ]
 
+  end
+
+  def self.add_diff_skip_field(field)
+    diff_skip_fields # make sure it's initialized
+    @@diff_skip_fields << field
   end
 
   def self.datetime_fields
@@ -388,7 +393,7 @@ class History < Sequel::Model(:history)
     (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
 
     (to_json.keys & from_json.keys).each do |k|
-      next if History.audit_fields.include?(k.intern)
+      next if History.diff_skip_fields.include?(k.intern)
       next if from_json[k] == to_json[k]
 
       if from_json[k].is_a? Array
@@ -428,7 +433,7 @@ class History < Sequel::Model(:history)
 
   def without_audit(hash)
     return hash unless hash.is_a?(Hash)
-    hash.select{|k,v| !History.audit_fields.include?(k.intern)}
+    hash.select{|k,v| !History.diff_skip_fields.include?(k.intern)}
   end
 
 
@@ -509,7 +514,7 @@ class History < Sequel::Model(:history)
   def _nested_hash_diff(from, to)
     out = {}
     (from.keys | to.keys).each do |k|
-      next if History.audit_fields.include?(k.intern)
+      next if History.diff_skip_fields.include?(k.intern)
       if from[k].is_a? Hash
         hd = _nested_hash_diff(from[k], to[k])
         out[k] = hd unless hd.empty?
