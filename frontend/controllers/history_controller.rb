@@ -2,6 +2,8 @@ class HistoryController < ApplicationController
 
   set_access_control  :public => [:index, :record, :version, :restore]
 
+  @@enum_handlers = []
+
   def index
     @title = "History | Recent updates"
     args = {:mode => 'full'}
@@ -144,26 +146,42 @@ class HistoryController < ApplicationController
     return value unless value.is_a?(String)
     return value if value.index(' ')
 
-    case type
-    when 'note'
-      type = '_note'
-      field = 'types'
-    when 'linked_agent'
-      field = 'archival_record_relators' if field == 'relator'
-    when 'sub_container'
-      type = 'container'
-      field = 'type' if field.start_with?('type')
+    new_type = type
+    new_field = field
+    @@enum_handlers.each do |handler|
+      (new_type, new_field) = handler.call(type, field)
     end
 
-    case field
-    when 'language'
-      type = 'language'
-      field = 'iso639_2'
-    when 'level'
-      type = 'archival_record'
+    if new_type == type && new_field == field
+      case type
+      when 'note'
+        type = '_note'
+        field = 'types'
+      when 'linked_agent'
+        field = 'archival_record_relators' if field == 'relator'
+      when 'sub_container'
+        type = 'container'
+        field = 'type' if field.start_with?('type')
+      end
+
+      case field
+      when 'language'
+        type = 'language'
+        field = 'iso639_2'
+      when 'level'
+        type = 'archival_record'
+      end
+    else
+      type = new_type
+      field = new_field
     end
 
     I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => I18n.t("enumerations.#{field}.#{value.to_s}", :default => value))
+  end
+
+
+  def self.add_enum_handler(&block)
+    @@enum_handlers << block
   end
 
 
