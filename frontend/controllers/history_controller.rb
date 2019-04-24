@@ -3,6 +3,21 @@ class HistoryController < ApplicationController
   set_access_control  :public => [:index, :record, :version, :restore]
 
   @@enum_handlers = []
+  @@skip_fields =
+    [
+     'lock_version',
+     'created_by',
+     'last_modified_by',
+     'create_time',
+     'system_mtime',
+     'user_mtime',
+     'jsonmodel_type',
+     'uri',
+     'history',
+     'agent_type',
+     'tree',
+    ]
+
 
   def index
     @title = "History | Recent updates"
@@ -65,19 +80,12 @@ class HistoryController < ApplicationController
 
   helper_method :skip_fields
   def skip_fields
-    [
-     'lock_version',
-     'created_by',
-     'last_modified_by',
-     'create_time',
-     'system_mtime',
-     'user_mtime',
-     'jsonmodel_type',
-     'uri',
-     'history',
-     'agent_type',
-     'tree',
-    ]
+    @@skip_fields
+  end
+
+
+  def self.add_skip_field(field)
+    @@skip_fields << field
   end
 
 
