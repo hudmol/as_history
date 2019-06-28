@@ -16,16 +16,23 @@ class History < Sequel::Model(:history)
       }
     }
 
+    model_map[model] = {}
+
     model.prepend(Auditable)
   end
 
   def self.models
-    @@models ||= []
-    @@models
+    @models ||= []
+    @models
+  end
+
+  def self.model_map
+    @model_map ||= {}
+    @model_map
   end
 
   def self.fields
-    @@fields ||=
+    @fields ||=
       [
        :record_id,
        :model,
@@ -42,7 +49,7 @@ class History < Sequel::Model(:history)
   end
 
   def self.diff_skip_fields
-    @@diff_skip_fields ||=
+    @diff_skip_fields ||=
       [
        :jsonmodel_type,
        :lock_version,
@@ -57,11 +64,16 @@ class History < Sequel::Model(:history)
 
   def self.add_diff_skip_field(field)
     diff_skip_fields # make sure it's initialized
-    @@diff_skip_fields << field
+    @diff_skip_fields << field
+  end
+
+  def self.add_model_map(model, map)
+    model_map # make sure it's initialized
+    @model_map[model] = @model_map[model].merge(map)
   end
 
   def self.datetime_fields
-    @@datetime_fields ||=
+    @datetime_fields ||=
       [
        :create_time,
        :system_mtime,
@@ -144,11 +156,11 @@ class History < Sequel::Model(:history)
           :uri => json[:uri],
           :label => label_for(json),
           :suppressed => json[:suppressed] ? 1 : 0,
-          :created_by => obj.created_by,
-          :last_modified_by => obj.last_modified_by,
-          :create_time => obj.create_time,
-          :system_mtime => obj.system_mtime,
-          :user_mtime => obj.user_mtime,
+          :created_by => map_field(obj, :created_by),
+          :last_modified_by => map_field(obj, :last_modified_by),
+          :create_time => map_field(obj, :create_time),
+          :system_mtime => map_field(obj, :system_mtime),
+          :user_mtime => map_field(obj, :user_mtime),
           :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json.to_hash(:trusted)))),
         }
 
@@ -161,6 +173,17 @@ class History < Sequel::Model(:history)
           # Someone beat us to it. No worries!
         end
       end
+    end
+  end
+
+
+  def self.map_field(obj, field)
+    val = model_map[obj.class].has_key?(field) ? model_map[obj.class][field] : field
+    
+    if val.is_a?(Proc)
+      val.call(obj)
+    else
+      obj.send(val)
     end
   end
 
