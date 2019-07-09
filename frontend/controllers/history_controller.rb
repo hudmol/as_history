@@ -154,41 +154,22 @@ class HistoryController < ApplicationController
     return value unless value.is_a?(String)
     return value if value.index(' ')
 
-    new_type = type
-    new_field = field
-    @@enum_handlers.each do |handler|
-      (new_type, new_field) = handler.call(type, field)
+    puts "EEEEEEE #{type} +++  #{field} === #{value}"
+
+    enum_name = @@enum_handlers.each do |handler|
+      if (enum_name = handler.call(type, field))
+        break enum_name
+      end
     end
 
-    if new_type == type && new_field == field
-      case type
-      when 'note'
-        type = '_note'
-        field = 'types'
-      when 'linked_agent'
-        field = 'archival_record_relators' if field == 'relator'
-      when 'sub_container'
-        type = 'container'
-        field = 'type' if field.start_with?('type')
-      end
+    enum_name ||= [type, field].join('_')
 
-      case field
-      when 'language'
-        type = 'language'
-        field = 'iso639_2'
-      when 'level'
-        type = 'archival_record'
-      end
-    else
-      type = new_type
-      field = new_field
-    end
-
-    I18n.t("enumerations.#{type}_#{field}.#{value}", :default => I18n.t("enumerations.#{field}.#{value}", :default => value))
+    I18n.t("enumerations.#{enum_name}.#{value}", :default => I18n.t("enumerations.#{field}.#{value}", :default => value))
   end
 
 
   def self.add_enum_handler(&block)
+    # the block should take a type and a field and return an enum name
     @@enum_handlers << block
   end
 
