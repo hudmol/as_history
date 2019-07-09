@@ -184,7 +184,7 @@ class HistoryController < ApplicationController
       field = new_field
     end
 
-    I18n.t("enumerations.#{type}_#{field}.#{value.to_s}", :default => I18n.t("enumerations.#{field}.#{value.to_s}", :default => value))
+    I18n.t("enumerations.#{type}_#{field}.#{value}", :default => I18n.t("enumerations.#{field}.#{value}", :default => value))
   end
 
 
