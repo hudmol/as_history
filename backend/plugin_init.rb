@@ -10,7 +10,6 @@ require_relative 'lib/history_request_handler.rb'
  DigitalObjectComponent,
  Assessment,
  Classification,
- CollectionManagement,
  ContainerProfile,
 
  AgentPerson,
