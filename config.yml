@@ -1,2 +1,5 @@
+depends_on_plugins:
+  - qsa_kitchensink
+
 recommends_plugins:
   - in_a_rush
