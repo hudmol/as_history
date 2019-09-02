@@ -39,26 +39,25 @@ begin
   SystemStatus.update('Last History Update', :no, 'History enabled. Waiting for updates ...')
 rescue => e
   Log.info "Install asam to enable history monitoring"
-  Log.debug "History asam fail: " + e.message
 
   # asam isn't active so fake SystemStatus and StatCounter
   class SystemStatus
     def self.method_missing(meth, *args)
-      Log.debug("asam not active, so ignoring: SystemStatus: ##{meth}(#{args.join(', ')})")
+      # don't complain, nobody cares
     end
   end
 
   class StatCounter
     def initialize(*args)
-      Log.debug("asam not active, so ignoring")
+      # don't complain, nobody cares
     end
 
     def method_missing(meth, *args)
-      Log.debug("asam not active, so ignoring: StatCounter: ##{meth}(#{args.join(', ')})")
+      # don't complain, nobody cares
     end
 
     def self.method_missing(meth, *args)
-      Log.debug("asam not active, so ignoring: StatCounter: ##{meth}(#{args.join(', ')})")
+      # don't complain, nobody cares
     end
   end
 end
