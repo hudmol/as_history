@@ -31,6 +31,9 @@ JSONModel::JSONModel(:history)
 URIResolver.register_resolver(HistoryResolver)
 
 
+# A marker mixin used to figure out whether we care about any of this
+module SystemStatusDisabled; end
+
 # wiring for asam
 begin
   StatCounter
@@ -42,12 +45,16 @@ rescue => e
 
   # asam isn't active so fake SystemStatus and StatCounter
   class SystemStatus
+    include SystemStatusDisabled
+
     def self.method_missing(meth, *args)
       # don't complain, nobody cares
     end
   end
 
   class StatCounter
+    include SystemStatusDisabled
+
     def initialize(*args)
       # don't complain, nobody cares
     end

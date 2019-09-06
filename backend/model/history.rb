@@ -229,6 +229,8 @@ class History < Sequel::Model(:history)
 
 
   def self.update_status(hist)
+    return if SystemStatus.ancestors.include?(SystemStatusDisabled)
+
     @stat_counter ||= StatCounter.new(60)
 
     SystemStatus.update('Last History Update', :good,
