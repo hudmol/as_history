@@ -136,17 +136,39 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self.clean_hash(hash)
+    return hash unless hash.is_a?(Hash)
+    hash = hash.reject{|k,v| diff_skip_fields.include?(k.intern)}
+    hash.each do |k,v|
+      if v.is_a?(Array)
+        hash[k] = v.map{|a| clean_hash(a)}
+      elsif v.is_a?(Hash)
+        hash[k] = clean_hash(v)
+      end
+    end
+    hash
+  end
+
+
+  def self.digest_json(json)
+    Digest::SHA1.hexdigest(ASUtils.to_json(clean_hash(json.to_hash(:trusted))))
+  end
+
+
   def self.ensure_current_versions(objs, jsons)
     return if objs.empty?
 
     latest_versions = db[:history]
-      .filter(:model => objs.first.class.table_name.to_s)
-      .filter(:record_id => objs.map{|o| o.id})
-      .group(:record_id)
-      .select_hash(:record_id, Sequel.function(:max, :lock_version).as(:max_version))
+      .left_join(Sequel.as(:history, :b), {:history__record_id => :b__record_id,  :history__model => :b__model}) {|j,lj,js|
+         Sequel.qualify(lj, :lock_version) < Sequel.qualify(j, :lock_version)
+       }
+      .filter(:b__lock_version => nil)
+      .filter(:history__model => objs.first.class.table_name.to_s)
+      .filter(:history__record_id => objs.map{|o| o.id})
+      .select_hash(:history__record_id, [:history__lock_version, :history__digest])
 
     jsons.zip(objs).each do |json, obj|
-      unless latest_versions[obj.id] && latest_versions[obj.id] == obj.lock_version
+      if !latest_versions[obj.id] || (latest_versions[obj.id][0] < obj.lock_version && latest_versions[obj.id][1] != digest_json(json))
 
         hist = {
           :record_id => obj.id,
@@ -161,6 +183,7 @@ class History < Sequel::Model(:history)
           :create_time => map_field(obj, :create_time),
           :system_mtime => map_field(obj, :system_mtime),
           :user_mtime => map_field(obj, :user_mtime),
+          :digest => digest_json(json),
           :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json.to_hash(:trusted)))),
         }
 

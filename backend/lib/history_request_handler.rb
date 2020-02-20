@@ -72,13 +72,22 @@ class HistoryRequestHandler
       {
         :data => version.data,
         :json => version.json(convert_uris),
-        :diff => (history.diff(version.version, diff || version.version - 1) rescue History::VersionNotFound && nil),
-        :inline_diff => (history.inline_diff(version.version, diff || version.version - 1) rescue History::VersionNotFound && nil),
+        :diff => (history.diff(version.version, diff || find_previous_version(version.version, list)) rescue History::VersionNotFound && nil),
+        :inline_diff => (history.inline_diff(version.version, diff || find_previous_version(version.version, list)) rescue History::VersionNotFound && nil),
         :can_restore => can_restore?(history.model, history.id, version.version),
         :versions => list,
       }
 
     end
+  end
+
+
+  def find_previous_version(current, versions)
+    prev = 0
+    versions.each do |v|
+      prev = v.version if v.version < current && v.version > prev
+    end
+    prev
   end
 
 
