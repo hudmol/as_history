@@ -46,7 +46,7 @@ module Auditable
         json['history'] = { 'ref' => History.uri_for(obj) }
       end
 
-      unless RequestContext.active? && RequestContext.get(:current_username) == User.SEARCH_USERNAME
+      unless RequestContext.active? && (RequestContext.get(:current_username) == User.SEARCH_USERNAME || RequestContext.get(:is_indexer_thread))
         History.ensure_current_versions(objs, jsons)
       end
 
