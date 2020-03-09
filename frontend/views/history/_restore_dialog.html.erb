@@ -3,7 +3,7 @@
 
   <% if can_restore %>
     <% if params[:id] %>
-      <%= t('plugins.history.restore.help', {:version => current_version+1}) %>
+      <%= t('plugins.history.restore.help') %>
     <% else %>
       <%= t('plugins.history.restore.not_from_recent_help') %>
     <% end %>

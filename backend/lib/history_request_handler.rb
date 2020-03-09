@@ -84,9 +84,10 @@ class HistoryRequestHandler
 
   def find_previous_version(current, versions)
     prev = 0
-    versions.each do |v|
-      prev = v.version if v.version < current && v.version > prev
+    versions.values.map{|v| v[:lock_version]}.each do |v|
+      prev = v if v < current && v > prev
     end
+
     prev
   end
 

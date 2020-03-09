@@ -136,10 +136,25 @@ class HistoryController < ApplicationController
   end
 
 
+  helper_method :previous_version
+  def previous_version
+    return false unless @version
+
+    this_v = data.fetch('lock_version', false)
+    return false unless this_v
+
+    prev_v = 0
+    @version['versions'].values.map{|v| v['lock_version']}.each do |v|
+      prev_v = v if v > prev_v && v < this_v
+    end
+
+    prev_v
+  end
+
+
   helper_method :diff_version
   def diff_version
-    dv = (params[:diff] || data.fetch('lock_version', 0) - 1).to_i
-    dv < 0 ? false : dv
+    params[:diff] || previous_version
   end
 
 

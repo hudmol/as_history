@@ -362,7 +362,6 @@ class History < Sequel::Model(:history)
   def self.restore_version!(model, record_id, version_id)
     record_model = ASModel.all_models.select {|m| m.table_name == model.intern}.first
     json = JSONModel::JSONModel(model.intern).from_hash(History.version(model, record_id, version_id).json(false))
-    json.lock_version = History.versions(model, record_id).values.first[:lock_version]
 
     reference = JSONModel.parse_reference(json.uri)
 
@@ -380,6 +379,7 @@ class History < Sequel::Model(:history)
   def self._handle_restore(model, id, json)
     begin
       obj = model.get_or_die(id)
+      json.lock_version = obj.lock_version
       obj.update_from_json(json)
     rescue NotFoundException
       # a restoring deleted record
