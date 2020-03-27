@@ -166,6 +166,7 @@ class HistoryController < ApplicationController
 
   helper_method :enum_translator
   def enum_translator(type, field, value)
+    return value if type.nil? # this can happen with deleted versions
     return value unless value.is_a?(String)
     return value if value.index(' ')
 
