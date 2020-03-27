@@ -187,14 +187,8 @@ class History < Sequel::Model(:history)
           :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json.to_hash(:trusted)))),
         }
 
-        begin
-          self.insert(hist)
+        handle_insert(hist)
 
-          update_status(hist)
-
-        rescue Sequel::UniqueConstraintViolation
-          # Someone beat us to it. No worries!
-        end
       end
     end
   end
@@ -236,9 +230,7 @@ class History < Sequel::Model(:history)
       :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json({:deleted => true}))),
     }
 
-    self.insert(hist)
-
-    update_status(hist)
+    handle_insert(hist)
   end
 
 
@@ -478,6 +470,19 @@ class History < Sequel::Model(:history)
 
 
   private
+
+  def self.handle_insert(hist)
+    begin
+      self.insert(hist)
+
+      update_status(hist)
+
+    rescue Sequel::UniqueConstraintViolation
+      # Someone beat us to it. No worries!
+    end
+
+  end
+
 
   def without_audit(hash)
     return hash unless hash.is_a?(Hash)
