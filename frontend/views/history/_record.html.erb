@@ -16,10 +16,13 @@
           elsif diff['_removes'].has_key?(k)
             sct = [{:class => 'history-change history-remove', :value => val, :diff => {'_to' => nil, '_from' => diff['_removes'][k]}}]
           elsif diff['_changes'].has_key?(k)
-            if diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].keys - skip_fields != []
+            if diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].has_key?('_from')
               sct = [{:class => 'history-change history-remove', :value => diff['_changes'][k]['_from'], :diff => diff['_changes'][k]},
                      {:class => 'history-change history-add', :value => diff['_changes'][k]['_to'], :diff => diff['_changes'][k]}]
               sct.push({:class => 'history-diff-field', :value => diff['_changes'][k]['_to']})
+            elsif diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].keys - skip_fields != []
+              sct.push({:class => 'history-change', :value => val, :diff => diff['_changes'][k]})
+              sct.push({:class => 'history-diff-field', :value => val, :diff => diff['_changes'][k]})
             elsif diff['_changes'][k].is_a?(Array)
               sct = [{:class => 'history-change', :value => val, :diff => diff['_changes'][k]}]
               sct.push({:class => 'history-diff-field', :value => val})
@@ -34,6 +37,7 @@
             if diff[k].has_key?('_from')
               sct.push({:class => 'history-change history-remove', :value => diff[k]['_from']}) if diff[k]['_from']
               sct.push({:class => 'history-change history-add', :value => diff[k]['_to']}) if diff[k]['_to']
+              sct.push({:class => 'history-diff-field', :value => diff[k]['_to']})
             else
               sct = [{:class => 'history-change', :value => val, :diff => diff[k]}]
               sct.push({:class => 'history-diff-field', :value => val})
@@ -57,7 +61,11 @@
           <div class="history-field <%= h[:class] %>">
             <span class="history-field-label">
 <%
-              if top
+              if v.is_a?(Array)
+                label = t(k.sub(/s$/,'') + '._plural', :default => t(data['model'] + '.' + k))
+              elsif v.is_a?(Hash)
+                label = t(k + '._singular', :default => t(data['model'] + '.' + k))
+              elsif top
                 label = t(data['model'] + '.' + k)
               else
                 label = t(field.sub(/s$/,'') + '.' + k)
