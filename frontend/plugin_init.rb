@@ -14,6 +14,8 @@ ArchivesSpace::Application.config.after_initialize do
       end
     when 'sub_container'
       "container_#{field.start_with?('type') ? 'type' : field}"
+    when "dates_of_existence"
+      "date_#{field}"
     end
   }
 
