@@ -221,3 +221,10 @@
 .history-nav-list {
   list-style: none;
 }
+
+.history-sb-mod_by {
+  display: inline-block;
+  padding-left: 12px;
+  width: 60px;
+  overflow: hidden;
+}
