@@ -170,9 +170,11 @@ class HistoryController < ApplicationController
     return value unless value.is_a?(String)
     return value if value.index(' ')
 
-    enum_name = @@enum_handlers.each do |handler|
+    enum_name = false
+
+    @@enum_handlers.each do |handler|
       if (enum_name = handler.call(type, field))
-        break enum_name
+        break
       end
     end
 
