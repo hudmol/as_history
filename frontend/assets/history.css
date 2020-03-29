@@ -85,6 +85,26 @@
   margin: 2px 8px 6px 30px;
 }
 
+.history-subrecord-1:hover {
+  background: #eee;
+}
+
+.history-subrecord-2:hover {
+  background: #ddd;
+}
+
+.history-subrecord-3:hover {
+  background: #ccc;
+}
+
+.history-subrecord-4:hover {
+  background: #bbb;
+}
+
+.history-subrecord-5:hover {
+  background: #aaa;
+}
+
 .history-field-label {
   color: #777;
 }

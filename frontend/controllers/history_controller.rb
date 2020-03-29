@@ -3,6 +3,7 @@ class HistoryController < ApplicationController
   set_access_control  :public => [:index, :record, :version, :restore]
 
   @@enum_handlers = []
+  @@top_fields = []
   @@skip_fields =
     [
      'lock_version',
@@ -86,6 +87,23 @@ class HistoryController < ApplicationController
 
   def self.add_skip_field(field)
     @@skip_fields << field
+  end
+
+
+  helper_method :top_fields
+  def top_fields
+    @@top_fields
+  end
+
+
+  def self.add_top_fields(fields)
+    @@top_fields += fields
+  end
+
+
+  helper_method :ordered
+  def ordered(json)
+    json.sort_by{|k,v| (@@top_fields.index(k) || 9999) }
   end
 
 

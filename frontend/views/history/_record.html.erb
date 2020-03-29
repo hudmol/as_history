@@ -1,11 +1,12 @@
 <%
+  depth ||= 0
   if diff && diff.has_key?('_removes')
     diff['_removes'].each do |k,v|
       json[k] = nil
     end
   end
 
-  json.each do |k,val|
+  ordered(json).each do |k,val|
     sct = []
     begin
       if diff.is_a?(Hash)
@@ -86,8 +87,8 @@
 <%
           elsif v.is_a?(Hash)
 %>
-            <div class="history-subrecord">
-              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff], :top => false, :field => k} %>
+            <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
+              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff], :top => false, :field => k, :depth => depth+1} %>
             </div>
 <%
           elsif v.is_a?(Array)
@@ -104,8 +105,8 @@
                   rh = Hash[d['_from'].keys.map{|k| [k, nil]}]
                 end
 %>
-                <div class="history-subrecord">
-                  <%= render_aspace_partial :partial => "history/record", :locals => {:json => rh, :diff => d, :top => false, :field => k} %>
+                <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
+                  <%= render_aspace_partial :partial => "history/record", :locals => {:json => rh, :diff => d, :top => false, :field => k, :depth => depth+1} %>
                 </div>
 <%
               end
