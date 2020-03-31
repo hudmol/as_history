@@ -109,8 +109,22 @@
   color: #777;
 }
 
+.as-history-main-layout {
+  display: grid;
+  grid-template-columns: 300px auto;
+  grid-template-rows: auto;
+}
+
 .as-history-main-pane {
-  margin-top: -13px;
+  grid-column: 2 / auto
+  grid-row: 1 / auto
+  margin-top: -20px;
+  margin-left: 30px;
+}
+
+.as-history-sidebar-pane {
+  grid-column: 1 / auto
+  grid-row: 1 / auto
 }
 
 .as-history-toolbar {
@@ -118,8 +132,10 @@
 }
 
 .history-sidebar {
-  position: relative;
+  margin-top: 12px;
   margin-bottom: 20px;
+  height: 600px;
+  overflow: auto;
 }
 
 .as-history-sb-diff-button {
@@ -133,6 +149,7 @@
 
 .history-version-box {
   position: relative;
+  width: 95%;
   z-index: 1;
 }
 
@@ -242,9 +259,13 @@
   list-style: none;
 }
 
-.history-sb-mod_by {
+.history-sb-mod-by {
   display: inline-block;
   padding-left: 12px;
-  width: 60px;
+  width: 65px;
   overflow: hidden;
+}
+
+#as-history-tb-diff-raw-button {
+  color: #666;
 }

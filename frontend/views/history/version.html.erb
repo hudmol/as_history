@@ -40,13 +40,13 @@
 
 
 <% if @version %>
-  <div class="row">
+  <div class="as-history-main-layout">
 
-    <div class="col-md-3">
+    <div class="as-history-sidebar-pane">
       <%= render_aspace_partial :partial => "history/sidebar" %>
     </div>
 
-    <div class="col-md-9 as-history-main-pane">
+    <div class="as-history-main-pane">
 
       <%= render_aspace_partial :partial => "history/toolbar" %>
 
@@ -58,11 +58,16 @@
         <h4><%= data['label'] %></h4>
 
         <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
+
+        <div class="history-raw-view">
+          <pre><%= json.pretty_inspect %></pre>
+        </div>
       </div>
 
     </div>
 
   </div>
+
 <% else %>
 
   <%= render_aspace_partial :partial => "shared/flash_messages" %>

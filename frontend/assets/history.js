@@ -5,39 +5,52 @@
     };
 
     ASHistory.prototype.updateDiffButtons = function(on_button) {
-	$('.as-history-tb-diff-button-group').children('a').css('background', 'initial');
+	      $('.as-history-tb-diff-button-group').children('a').css('background', 'initial');
         $('#' + on_button).css('background', '#ddd');
     };
 
     ASHistory.prototype.setDiffMode = function(mode) {
-	if (mode == 'only') {
-	    $('.history-diff-field').slideUp();
-	    $('.history-clean-field').slideUp();
-	    $('.history-change').slideDown();
-	} else if (mode == 'clean') {
-	    $('.history-diff-field').slideDown();
-	    $('.history-clean-field').slideDown();
-	    $('.history-change').slideUp();
-	} else { // 'all'
-	    $('.history-diff-field').slideUp();
-	    $('.history-clean-field').slideDown();
-	    $('.history-change').slideDown();
-	    mode = 'all';
-	}
+        if (mode == 'only') {
+            $('.history-raw-view').slideUp();
+            $('.history-diff-field').slideUp();
+            $('.history-clean-field').slideUp();
+            $('.history-change').slideDown();
+        } else if (mode == 'clean') {
+            $('.history-raw-view').slideUp();
+            $('.history-diff-field').slideDown();
+            $('.history-clean-field').slideDown();
+            $('.history-change').slideUp();
+        } else if (mode == 'raw') {
+            $('.history-diff-field').slideUp();
+            $('.history-clean-field').slideUp();
+            $('.history-change').slideUp();
+            $('.history-raw-view').slideDown();
+        } else { // 'all'
+            $('.history-raw-view').slideUp();
+            $('.history-diff-field').slideUp();
+            $('.history-clean-field').slideDown();
+            $('.history-change').slideDown();
+            mode = 'all';
+        }
+
         this.updateDiffButtons('as-history-tb-diff-' + mode + '-button');
-	localStorage.setItem('as_history_show_diff_mode', mode);
+        localStorage.setItem('as_history_show_diff_mode', mode);
     };
 
     ASHistory.prototype.showDiffOnlyClick = function() {
-	this.setDiffMode('only');
+        this.setDiffMode('only');
     };
 
     ASHistory.prototype.showDiffAllClick = function() {
-	this.setDiffMode('all');
+        this.setDiffMode('all');
     };
 
     ASHistory.prototype.showDiffCleanClick = function() {
-	this.setDiffMode('clean');
+        this.setDiffMode('clean');
+    };
+
+    ASHistory.prototype.showDiffRawClick = function() {
+        this.setDiffMode('raw');
     };
 
     ASHistory.prototype.updateBrowseButton = function() {

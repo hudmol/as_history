@@ -3,7 +3,7 @@
   <%
     last_ver = false
     @version['versions'].each do |uri, ver|
-      mod_by = "<span class=\"history-sb-mod_by pull-left\" title=\"#{ver['last_modified_by']}\">#{ver['last_modified_by']}</span>"
+      mod_by = "<span class=\"history-sb-mod-by pull-left\" title=\"#{ver['last_modified_by']}\">#{ver['last_modified_by']}</span>"
       same_record_as_last = false
       showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['lock_version'] == data['lock_version'] ? 'history-showing-version' : ''
       button_label = if last_ver && [ver['model'], ver['record_id']] === [last_ver['model'], last_ver['record_id']]
@@ -13,7 +13,7 @@
                      else
                        ['<strong>', ver['short_label'], '</strong>', '<br>',
                         version_display(ver['model'], ver['record_id'], ver['lock_version']), '<br>',
-                        mod_by, ver['user_mtime']].join(' ')
+                        ver['last_modified_by'], '<br>', ver['user_mtime']].join(' ')
                      end
       button_label = button_label.html_safe
   %>
@@ -37,3 +37,10 @@
   <% end %>
 
 </div>
+
+<script>
+  $(function() {
+    $('.history-sidebar').height($(window).height() - $('.history-sidebar').position().top - 100);
+    $('.history-showing-version')[0].scrollIntoView({block: "center", behavior: "smooth"});
+  });
+</script>

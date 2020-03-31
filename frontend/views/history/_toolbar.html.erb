@@ -24,6 +24,12 @@
     <div style="width:12px;height:2px;background:#777;margin:0px 0px 2px 0px;"></div>
     <div style="width:12px;height:2px;background:#777;margin:0px 0px 4px 0px;"></div>
   </a>
+  <a id="as-history-tb-diff-raw-button"
+    class="btn btn-default as-history-tb-button"
+    onclick="as_history.showDiffRawClick();"
+    href="javascript:void(0);">
+    { }
+  </a>
 </div>
 
 <div class="btn-group">
@@ -56,18 +62,23 @@
   end
 %>
 
-<%= link_to t('plugins.history.exit_button_label'),
-            link_hash,
-            {:class => 'btn btn-default as-history-tb-button', :id => 'as-history-tb-exit-button'} %>
+<div class="btn-group">
+  <%= link_to t('plugins.history.exit_button_label'),
+              link_hash,
+              {:class => 'btn btn-default as-history-tb-button', :id => 'as-history-tb-exit-button'} %>
+</div>
 
-<a id="as-history-tb-restore-button"
-  class="btn btn-default pull-right as-history-tb-button"
-  onclick="$('#as-history-restore-dialog').slideToggle();"
-  href="javascript:void(0);">
-  <span class="glyphicon glyphicon-clock"></span>
-  <%= t('plugins.history.show_restore_button_label') %>
-  <span style="vertical-align:middle;" class="caret"></span>
-</a>
+<div class="btn-group pull-right">
+  <a id="as-history-tb-restore-button"
+     class="btn btn-default as-history-tb-button"
+     onclick="$('#as-history-restore-dialog').slideToggle();"
+     href="javascript:void(0);">
+    <span class="glyphicon glyphicon-clock"></span>
+    <%= t('plugins.history.show_restore_button_label') %>
+    <span style="vertical-align:middle;" class="caret"></span>
+  </a>
+</div>
+
 </div>
 
 
