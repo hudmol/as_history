@@ -53,11 +53,11 @@
   display: none;
 }
 
-.history-add {
+.history-add, .history-add > a {
   color: #0c0;
 }
 
-.history-remove {
+.history-remove, .history-remove > a {
   color: #f00;
 }
 
@@ -86,23 +86,23 @@
 }
 
 .history-subrecord-1:hover {
-  background: #eee;
+  background: #f7f7f7;
 }
 
 .history-subrecord-2:hover {
-  background: #ddd;
+  background: #efefef;
 }
 
 .history-subrecord-3:hover {
-  background: #ccc;
+  background: #e7e7e7;
 }
 
 .history-subrecord-4:hover {
-  background: #bbb;
+  background: #dfdfdf;
 }
 
 .history-subrecord-5:hover {
-  background: #aaa;
+  background: #d7d7d7;
 }
 
 .history-field-label {
@@ -268,4 +268,8 @@
 
 #as-history-tb-diff-raw-button {
   color: #666;
+}
+
+.history-raw-view {
+  display: none;
 }

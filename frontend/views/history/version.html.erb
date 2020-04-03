@@ -57,7 +57,7 @@
 
         <h4><%= data['label'] %></h4>
 
-        <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff => @version['diff'], :top => true} %>
+        <%= render_aspace_partial :partial => "history/record", :locals => {:json => @version['inline_diff']} %>
 
         <div class="history-raw-view">
           <pre><%= json.pretty_inspect %></pre>

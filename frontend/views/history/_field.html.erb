@@ -1,0 +1,78 @@
+<%
+  # field - the name of the field
+  # json - the contents of the field
+  # depth - how many levels down. 0 = top
+  # parent - the name of the field's parent
+  # diff_context - :add, :remove, false = the inherited diff
+  # diff_mode - :clean, :diff, :add, :remove
+
+  top = depth == 0
+  diff_context ||= false;
+
+  if field
+    if json.is_a?(Array)
+      label = t(field.sub(/s$/,'') + '._plural', :default => t(data['model'] + '.' + field))
+    elsif json.is_a?(Hash)
+      label = t(field + '._singular', :default => t(data['model'] + '.' + field))
+    elsif top
+      label = t(data['model'] + '.' + field)
+    else
+      label = t(parent.sub(/s$/,'') + '.' + field)
+    end
+    label = (label[:_plural] || field) if label.is_a?(Hash)
+  else
+    label = false
+  end
+%>
+
+<div class="history-field <%= classes_for_diff_mode(diff_mode) %>">
+
+  <% if label %>
+    <span class="history-field-label"><%= label %>:</span>
+  <% end %>
+
+  <% if json.is_a?(String) && json.start_with?('/history/') %>
+
+    <%= link_to(version_display(*json.split('/').drop(2)), json) %>
+
+  <% elsif json.is_a?(Hash) && json.has_key?('ref') && json['ref'].is_a?(String) && json['ref'].start_with?('/history') %>
+
+    <%= link_to(version_display(*json['ref'].split('/').drop(2)), json['ref']) %>
+
+  <% elsif json.is_a?(Hash) %>
+
+    <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
+      <%= render_aspace_partial :partial => "history/record", :locals => {:json => json, :diff_context => diff_context,
+                                                                          :parent => field, :depth => depth+1} %>
+    </div>
+
+  <% elsif json.is_a?(Array) %>
+    <% json.each do |record| %>
+      <% if is_a_diff(record) %>
+        <% (from, to) = get_diff(record) %>
+        <% if from %>
+          <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
+            <%= render_aspace_partial :partial => "history/record",
+                                      :locals => {:json => from, :diff_context => :remove, :parent => field, :depth => depth+1} %>
+          </div>
+        <% end %>
+
+        <% if to %>
+          <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
+            <%= render_aspace_partial :partial => "history/record",
+                                      :locals => {:json => to, :diff_context => :add, :parent => field, :depth => depth+1} %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
+          <%= render_aspace_partial :partial => "history/record",
+                                    :locals => {:json => record, :diff_context => diff_context, :parent => field, :depth => depth+1} %>
+        </div>
+      <% end %>
+    <% end %>
+
+  <% else %>
+    <%= enum_translator(top ? data['model'] : parent.sub(/s$/,''), field, json) %>
+  <% end %>
+
+</div>

@@ -422,12 +422,12 @@ class History < Sequel::Model(:history)
   end
 
 
-  def diff(a, b)
+  def diff(a, b, convert_uris)
     diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
     return diffs if a == b
 
-    from_json = version([a,b].min).json(false)
-    to_json = version([a,b].max).json(false)
+    (from_json, to_json) = diff_versions_json(a, b, convert_uris)
+    return diffs unless from_json && to_json
 
     (to_json.keys - from_json.keys).each{|k| diffs[:_adds][k] = to_json[k]}
     (from_json.keys - to_json.keys).each{|k| diffs[:_removes][k] = from_json[k]}
@@ -460,12 +460,34 @@ class History < Sequel::Model(:history)
   end
 
 
-  def inline_diff(a, b)
-    from_json = version([a,b].min).json(false)
-    return from_json if a == b
-    to_json = version([a,b].max).json(false)
+  def diff_versions_json(a, b, convert_uris = true)
+    begin
+      from_json = version([a,b].min).json(convert_uris)
+    rescue VersionNotFound
+      # too bad, but there might be a to_json, so ...
+    end
 
-    inline_hash_diff(from_json, to_json)
+    return [from_json, nil] if from_json && a == b
+
+    begin
+      to_json = version([a,b].max).json(convert_uris)
+    rescue VersionNotFound => e
+      # ok so we tried, but if neither version exists, then ...
+      raise e unless from_json
+    end
+
+    [from_json, to_json]
+  end
+
+
+  def inline_diff(a, b, convert_uris = true)
+    (from_json, to_json) = diff_versions_json(a, b, convert_uris)
+
+    if from_json && to_json
+      inline_hash_diff(from_json, to_json)
+    else
+      [from_json, to_json].compact.first
+    end
   end
 
 
@@ -503,7 +525,15 @@ class History < Sequel::Model(:history)
           aa.zip(b[b_key]).each do |av, bv|
             out[a_key] ||= []
             if av && bv
-              out[a_key].push(inline_hash_diff(av, bv))
+              if av.is_a? Hash
+                out[a_key].push(inline_hash_diff(av, bv))
+              else
+                if compare(av, bv)
+                  out[a_key].push(av)
+                else
+                  out[a_key].push({'_diff' => [av, bv]})
+                end
+              end
             elsif av
               out[a_key].push({'_diff' => [without_audit(av), nil]})
             else
@@ -511,8 +541,8 @@ class History < Sequel::Model(:history)
             end
           end
         else
-          if a[a_key] == b[b_key]
-            out[a_key] = a[a_key]
+          if compare(a[a_key], b[b_key])
+            out[b_key] = b[b_key]
           else
             out[a_key] = {'_diff' => [a[a_key], b[b_key]]}
           end
@@ -525,6 +555,14 @@ class History < Sequel::Model(:history)
     end
 
     out
+  end
+
+
+  def compare(a, b)
+    # don't be foxed by converted uris
+    a = a.sub(/\/\d+$/, '') if a.is_a?(String) && a.start_with?('/history/')
+    b = b.sub(/\/\d+$/, '') if b.is_a?(String) && b.start_with?('/history/')
+    a == b
   end
 
 
@@ -562,8 +600,6 @@ class History < Sequel::Model(:history)
   end
 
 
-
-
   def _nested_hash_diff(from, to)
     out = {}
     (from.keys | to.keys).each do |k|
@@ -573,7 +609,7 @@ class History < Sequel::Model(:history)
         out[k] = hd unless hd.empty?
         next
       end
-      next if from[k] == to[k]
+      next if compare(from[k], to[k])
       out[k] = {:_from => from[k], :_to => to[k]}
     end
     out

@@ -101,9 +101,38 @@ class HistoryController < ApplicationController
   end
 
 
-  helper_method :ordered
-  def ordered(json)
-    json.sort_by{|k,v| (@@top_fields.index(k) || 9999) }
+  helper_method :classes_for_diff_mode
+  def classes_for_diff_mode(mode)
+    @@diff_mode_class_map ||= {
+      :clean => 'history-clean-field',
+      :diff => 'history-diff-field',
+      :add => 'history-change history-add',
+      :remove => 'history-change history-remove',
+    }
+
+    @@diff_mode_class_map.fetch(mode, 'history-clean-field')
+  end
+
+
+  helper_method :is_a_diff
+  def is_a_diff(json)
+    json.is_a?(Hash) && json.has_key?('_diff')
+  end
+
+
+  helper_method :get_diff
+  def get_diff(json)
+    return false unless is_a_diff(json)
+    json['_diff']
+  end
+
+
+  helper_method :clean_for_render
+  def clean_for_render(json, top)
+    json.reject{|k,v| skip_fields.include?(k)}
+        .reject{|k,v| v.is_a?(Array) && v.empty?}
+        .reject{|k,v| (['repository', 'parent'].include?(k) && !top)}
+        .sort_by{|k,v| (@@top_fields.index(k) || 9999) }
   end
 
 

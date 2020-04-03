@@ -15,6 +15,7 @@
             $('.history-diff-field').slideUp();
             $('.history-clean-field').slideUp();
             $('.history-change').slideDown();
+            $('.history-change').parents('.history-subrecord, .history-field').slideDown();
         } else if (mode == 'clean') {
             $('.history-raw-view').slideUp();
             $('.history-diff-field').slideDown();

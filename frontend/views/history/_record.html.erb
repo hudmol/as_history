@@ -1,126 +1,48 @@
 <%
   depth ||= 0
-  if diff && diff.has_key?('_removes')
-    diff['_removes'].each do |k,v|
-      json[k] = nil
-    end
+  diff_context ||= false
+  parent ||= false
+  top = depth == 0
+
+  if json.is_a?(String)
+    json = {false => json}
   end
 
-  ordered(json).each do |k,val|
-    sct = []
-    begin
-      if diff.is_a?(Hash)
-        if diff.has_key?('_adds') # top level diff
-          if diff['_adds'].has_key?(k)
-            sct = [{:class => 'history-change history-add', :value => val, :diff => {'_to' => diff['_adds'][k], '_from' => nil}}]
-            sct.push({:class => 'history-diff-field', :value => val})
-          elsif diff['_removes'].has_key?(k)
-            sct = [{:class => 'history-change history-remove', :value => val, :diff => {'_to' => nil, '_from' => diff['_removes'][k]}}]
-          elsif diff['_changes'].has_key?(k)
-            if diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].has_key?('_from')
-              sct = [{:class => 'history-change history-remove', :value => diff['_changes'][k]['_from'], :diff => diff['_changes'][k]},
-                     {:class => 'history-change history-add', :value => diff['_changes'][k]['_to'], :diff => diff['_changes'][k]}]
-              sct.push({:class => 'history-diff-field', :value => diff['_changes'][k]['_to']})
-            elsif diff['_changes'][k].is_a?(Hash) && diff['_changes'][k].keys - skip_fields != []
-              sct.push({:class => 'history-change', :value => val, :diff => diff['_changes'][k]})
-              sct.push({:class => 'history-diff-field', :value => val, :diff => diff['_changes'][k]})
-            elsif diff['_changes'][k].is_a?(Array)
-              sct = [{:class => 'history-change', :value => val, :diff => diff['_changes'][k]}]
-              sct.push({:class => 'history-diff-field', :value => val})
-            end
-          end
-        else
-          if diff.has_key?('_from')
-            sct = []
-            sct.push({:class => 'history-change history-remove', :value => diff['_from'][k]}) if diff['_from'] && diff['_from'][k]
-            sct.push({:class => 'history-change history-add', :value => diff['_to'][k]}) if diff['_to'] && diff['_to'][k]
-          elsif diff.has_key?(k) && diff[k].is_a?(Hash)
-            if diff[k].has_key?('_from')
-              sct.push({:class => 'history-change history-remove', :value => diff[k]['_from']}) if diff[k]['_from']
-              sct.push({:class => 'history-change history-add', :value => diff[k]['_to']}) if diff[k]['_to']
-              sct.push({:class => 'history-diff-field', :value => diff[k]['_to']})
-            else
-              sct = [{:class => 'history-change', :value => val, :diff => diff[k]}]
-              sct.push({:class => 'history-diff-field', :value => val})
-            end
-          end
-        end
-      end
-    rescue
-      # something bad happened, possibly to do with schemas changing between versions
-      # just do the best we can
-      sct = [{:class => 'history-change', :value => val, :diff => "UNKNOWN DIFF"}]
-      sct.push({:class => 'history-diff-field', :value => val})
+  clean_for_render(json, top).each do |key, val|
+    if diff_context
+      remove_add = [nil, val]
+      remove_add.reverse! if diff_context == :remove
+      val = {'_diff' => remove_add}
     end
 
-    sct.push({:class => 'history-clean-field', :value => val}) if sct.empty?
+    if val.is_a?(Hash) && val.has_key?('_diff')
+      (from, to) = val['_diff']
 
-      sct.each do |h|
-        v = h[:value]
-        unless (v.is_a?(Array) && v.empty? && !h[:diff]) || skip_fields.include?(k) || (['repository', 'parent'].include?(k) && !top)
-%>
-          <div class="history-field <%= h[:class] %>">
-            <span class="history-field-label">
-<%
-              if v.is_a?(Array)
-                label = t(k.sub(/s$/,'') + '._plural', :default => t(data['model'] + '.' + k))
-              elsif v.is_a?(Hash)
-                label = t(k + '._singular', :default => t(data['model'] + '.' + k))
-              elsif top
-                label = t(data['model'] + '.' + k)
-              else
-                label = t(field.sub(/s$/,'') + '.' + k)
-              end
-              label = (label[:_plural] || k) if label.is_a?(Hash)
-%>
-              <%= label %>:
-            </span>
+      if to %>
+        <%= render_aspace_partial :partial => "history/field", :locals => {:field => key, :json => to,
+                                                                           :depth => depth, :parent => parent,
+                                                                           :diff_mode => :diff} %>
+      <% end %>
 
-<%
-          if v.is_a?(String) && v.start_with?('/history/')
-%>
-            <%= va = v.split('/'); link_to version_display(va[2], va[3], va[4]), v %>
-<%
-          elsif v.is_a?(Hash) && v.has_key?('ref') && v['ref'].start_with?('/history')
-%>
-            <%= va = v['ref'].split('/'); link_to version_display(va[2], va[3], va[4]), v['ref'] %>
-<%
-          elsif v.is_a?(Hash)
-%>
-            <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
-              <%= render_aspace_partial :partial => "history/record", :locals => {:json => v, :diff => h[:diff], :top => false, :field => k, :depth => depth+1} %>
-            </div>
-<%
-          elsif v.is_a?(Array)
-            da = h[:diff].is_a?(Array) ? h[:diff] : []
-            va = v + (Array.new([da.length - v.length, 0].max))
-            va.zip(da) do |r,d|
-              if r.is_a?(String)
-%>
-                <%= r %>
-<%
-              else
-                rh = r
-                unless rh
-                  rh = Hash[d['_from'].keys.map{|k| [k, nil]}]
-                end
-%>
-                <div class="history-subrecord history-subrecord-<%= [5, depth+1].min %>">
-                  <%= render_aspace_partial :partial => "history/record", :locals => {:json => rh, :diff => d, :top => false, :field => k, :depth => depth+1} %>
-                </div>
-<%
-              end
-            end
-          else
-            ev = v.nil? ? (h.has_key?(:diff) ? h[:diff]['_from'] : nil) : v
-%>
-            <%= enum_translator(top ? json['jsonmodel_type'] : field.sub(/s$/,''), k, ev) %>
-<%
-          end
-%>
-  </div>
-<%
-      end
-    end
-  end
-%>
+      <% if from %>
+        <%= render_aspace_partial :partial => "history/field", :locals => {:field => key, :json => from,
+                                                                           :depth => depth, :parent => parent,
+                                                                           :diff_context => :remove,
+                                                                           :diff_mode => :remove} %>
+      <% end %>
+
+      <% if to %>
+        <%= render_aspace_partial :partial => "history/field", :locals => {:field => key, :json => to,
+                                                                           :depth => depth, :parent => parent,
+                                                                           :diff_context => :add,
+                                                                           :diff_mode => :add} %>
+      <% end %>
+
+    <% else %>
+      <%= render_aspace_partial :partial => "history/field", :locals => {:field => key, :json => val,
+                                                                         :depth => depth, :parent => parent,
+                                                                         :diff_context => diff_context,
+                                                                         :diff_mode => :clean} %>
+    <% end %>
+
+<% end %>

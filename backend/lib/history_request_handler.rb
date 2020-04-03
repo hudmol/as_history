@@ -69,15 +69,18 @@ class HistoryRequestHandler
       version.data
 
     when /^f/ # full
+      inline_diff = if model && id
+                      (history.inline_diff(version.version, diff || find_previous_version(version.version, list), convert_uris))
+                    else
+                      version.json(convert_uris)
+                    end
       {
         :data => version.data,
-        :json => version.json(convert_uris),
-        :diff => (history.diff(version.version, diff || find_previous_version(version.version, list)) rescue History::VersionNotFound && nil),
-        :inline_diff => (history.inline_diff(version.version, diff || find_previous_version(version.version, list)) rescue History::VersionNotFound && nil),
+        :json => version.json(false),
+        :inline_diff => inline_diff,
         :can_restore => can_restore?(history.model, history.id, version.version),
         :versions => list,
       }
-
     end
   end
 
