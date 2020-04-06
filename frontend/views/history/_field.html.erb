@@ -35,7 +35,7 @@
 
     <%= link_to(version_display(*json.split('/').drop(2)), json) %>
 
-  <% elsif json.is_a?(Hash) && json.has_key?('ref') && json['ref'].is_a?(String) && json['ref'].start_with?('/history') %>
+  <% elsif json.is_a?(Hash) && json.has_key?('ref') && json['ref'].is_a?(String) && json['ref'].start_with?('/history') && json.keys.length == 1 %>
 
     <%= link_to(version_display(*json['ref'].split('/').drop(2)), json['ref']) %>
 
