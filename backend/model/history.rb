@@ -152,8 +152,8 @@ class History < Sequel::Model(:history)
   end
 
 
-  def self.digest_json(json)
-    Digest::SHA1.hexdigest(ASUtils.to_json(clean_hash(json.to_hash(:trusted))))
+  def self.digest_json(json_hash)
+    Digest::SHA1.hexdigest(ASUtils.to_json(clean_hash(json_hash)))
   end
 
 
@@ -170,8 +170,10 @@ class History < Sequel::Model(:history)
       .select_hash(:history__record_id, [:history__lock_version, :history__digest, :history__revision])
 
     jsons.zip(objs).each do |json, obj|
-      if !latest_versions[obj.id] || (latest_versions[obj.id][0] < obj.lock_version && latest_versions[obj.id][1] != digest_json(json))
+      json_hash = json.to_hash(:trusted)
+      digest = digest_json(json_hash)
 
+      if !latest_versions[obj.id] || (latest_versions[obj.id][0] < obj.lock_version && latest_versions[obj.id][1] != digest)
         hist = {
           :record_id => obj.id,
           :model => obj.class.table_name.to_s,
@@ -186,12 +188,11 @@ class History < Sequel::Model(:history)
           :create_time => map_field(obj, :create_time),
           :system_mtime => map_field(obj, :system_mtime),
           :user_mtime => map_field(obj, :user_mtime),
-          :digest => digest_json(json),
-          :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json.to_hash(:trusted)))),
+          :digest => digest,
+          :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json_hash))),
         }
 
         handle_insert(hist)
-
       end
     end
   end
@@ -216,6 +217,7 @@ class History < Sequel::Model(:history)
     # give us the latest version
     latest_version = History.new(obj.class.table_name.to_s, obj.id).version
     label = label_for(latest_version.json)
+    json = {:deleted => true}
 
     hist = {
       :record_id => obj.id,
@@ -231,7 +233,8 @@ class History < Sequel::Model(:history)
       :create_time => obj.create_time,
       :system_mtime => obj.system_mtime,
       :user_mtime => Time.now,
-      :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json({:deleted => true}))),
+      :digest => digest_json(json),
+      :json => Sequel::SQL::Blob.new(Zlib::Deflate.deflate(ASUtils.to_json(json))),
     }
 
     handle_insert(hist)
