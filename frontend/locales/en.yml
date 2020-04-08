@@ -48,6 +48,7 @@ en:
         diff_only_history: Show differences only
         diff_all_history: Show record with differences
         diff_clean_history: Show clean record
+        diff_raw_history: Show raw record
         record_audit_history: Toggle record audit data
         exit_history: Return to live record
         restore_history: Toggle restore dialog

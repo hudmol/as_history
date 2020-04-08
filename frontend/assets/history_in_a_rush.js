@@ -61,8 +61,19 @@ $(function() {
     });
 
     InARush.Bindings.addBinding({
-      id: 'record_audit_history',
+      id: 'diff_raw_history',
       keySequence: ['4'],
+      handler: function () {
+		$('#as-history-tb-diff-raw-button').click();
+	       },
+      description: translate('diff_raw_history'),
+      condition: function () { return $('#as-history-tb-diff-raw-button').length > 0; },
+      category: translate('category_history'),
+    });
+
+    InARush.Bindings.addBinding({
+      id: 'record_audit_history',
+      keySequence: ['5'],
       handler: function () {
 		$('#as-history-tb-record-button').click();
 	       },
@@ -73,7 +84,7 @@ $(function() {
 
     InARush.Bindings.addBinding({
       id: 'exit_history',
-      keySequence: ['5'],
+      keySequence: ['6'],
       handler: function () {
 		window.location.href = $('#as-history-tb-exit-button').attr('href');
 	       },
@@ -84,7 +95,7 @@ $(function() {
 
     InARush.Bindings.addBinding({
       id: 'restore_history',
-      keySequence: ['6'],
+      keySequence: ['7'],
       handler: function () {
 		$('#as-history-tb-restore-button').click();
 	       },
