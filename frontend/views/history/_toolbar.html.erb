@@ -37,7 +37,7 @@
     class="btn btn-default as-history-tb-button"
     onclick="$('#as-history-audit-dialog').slideToggle();"
     href="javascript:void(0);">
-    <%= version_display(data['model'], data['record_id'], data['lock_version']) %>
+    <%= version_display(data['model'], data['record_id'], data['revision']) %>
     <% if diff_version %>
       ..<small>v<%= diff_version %></small>
     <% end %>

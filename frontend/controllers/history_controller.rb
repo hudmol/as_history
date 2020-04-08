@@ -1,11 +1,12 @@
 class HistoryController < ApplicationController
 
-  set_access_control  :public => [:index, :record, :version, :restore]
+  set_access_control  'view_repository' => [:index, :record, :version, :restore]
 
   @@enum_handlers = []
   @@top_fields = []
   @@skip_fields =
     [
+     'revision',
      'lock_version',
      'created_by',
      'last_modified_by',
@@ -187,11 +188,11 @@ class HistoryController < ApplicationController
   def previous_version
     return false unless @version
 
-    this_v = data.fetch('lock_version', false)
+    this_v = data.fetch('revision', false)
     return false unless this_v
 
     prev_v = 0
-    @version['versions'].values.map{|v| v['lock_version']}.each do |v|
+    @version['versions'].values.map{|v| v['revision']}.each do |v|
       prev_v = v if v > prev_v && v < this_v
     end
 

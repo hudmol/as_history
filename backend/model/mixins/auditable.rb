@@ -13,7 +13,8 @@ module Auditable
     # be a version for the latest state of the record
     # so let's make sure it's there before we delete
     begin
-      History.new(self.class.table_name.to_s, self.id).version(self.lock_version)
+      version = History.new(self.class.table_name.to_s, self.id).version
+      raise History::VersionNotFound.new if version.lock_version != self.lock_version
     rescue History::VersionNotFound
       # the version will be created when we get the record
       self.class.to_jsonmodel(self.id)

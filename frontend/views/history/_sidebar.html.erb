@@ -5,26 +5,26 @@
     @version['versions'].each do |uri, ver|
       mod_by = "<span class=\"history-sb-mod-by pull-left\" title=\"#{ver['last_modified_by']}\">#{ver['last_modified_by']}</span>"
       same_record_as_last = false
-      showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['lock_version'] == data['lock_version'] ? 'history-showing-version' : ''
+      showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['revision'] == data['revision'] ? 'history-showing-version' : ''
       button_label = if last_ver && [ver['model'], ver['record_id']] === [last_ver['model'], last_ver['record_id']]
                        same_record_as_last = true
                        [mod_by, ver['user_mtime']].join(' ') +
-                       "  .v<strong>#{ver['lock_version']}</strong>"
+                       "  .v<strong>#{ver['revision']}</strong>"
                      else
                        ['<strong>', ver['short_label'], '</strong>', '<br>',
-                        version_display(ver['model'], ver['record_id'], ver['lock_version']), '<br>',
+                        version_display(ver['model'], ver['record_id'], ver['revision']), '<br>',
                         ver['last_modified_by'], '<br>', ver['user_mtime']].join(' ')
                      end
       button_label = button_label.html_safe
   %>
 
-    <div class="history-version-box <%= 'history-version-box-same-as-last' if same_record_as_last %>" data-version="<%= ver['lock_version'] %>">
-      <% if params[:id] && ver['lock_version'] != data['lock_version'] &&
-            ver['lock_version'] != diff_version &&
-            ver['lock_version'] < data['lock_version'] %>
+    <div class="history-version-box <%= 'history-version-box-same-as-last' if same_record_as_last %>" data-version="<%= ver['revision'] %>">
+      <% if params[:id] && ver['revision'] != data['revision'] &&
+            ver['revision'] != diff_version &&
+            ver['revision'] < data['revision'] %>
         <a class="btn btn-default as-history-sb-diff-button"
-           title="<%= t('plugins.history.diff_from_version', {:version => ver['lock_version']}) %>"
-           href="<%= history_uri(params[:model], params[:id], (params[:version] || data['lock_version']), {:diff => ver['lock_version']}) %>">
+           title="<%= t('plugins.history.diff_from_version', {:version => ver['revision']}) %>"
+           href="<%= history_uri(params[:model], params[:id], (params[:version] || data['revision']), {:diff => ver['revision']}) %>">
           <span class="glyphicon glyphicon-arrow-up"></span>
         </a>
       <% end %>

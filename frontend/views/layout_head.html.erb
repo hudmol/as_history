@@ -53,7 +53,7 @@
 
     ASHISTORY_USER = '<%= params[:user] %>';
     ASHISTORY_ID = <%= params[:id] || false %>;
-    ASHISTORY_VERSION = <%= params[:version] || data['lock_version'] || false %>;
+    ASHISTORY_VERSION = <%= params[:version] || data['revision'] || false %>;
     ASHISTORY_DIFF = <%= diff_version %>;
 
   </script>

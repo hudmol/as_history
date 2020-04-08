@@ -11,7 +11,7 @@
     <% @recent.each do |version| %>
       <tr>
         <td><%= version['uri'] %></td>
-        <td><%= version['lock_version'] %></td>
+        <td><%= version['revision'] %></td>
         <td><%= version['last_modified_by'] %></td>
         <td><%= version['user_mtime'] %></td>
       <tr>

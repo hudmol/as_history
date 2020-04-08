@@ -53,7 +53,7 @@ class HistoryRequestHandler
         history = History.new(latest[:model], latest[:record_id])
         [
          history,
-         history.version(latest[:lock_version]),
+         history.version(latest[:revision]),
          versions
         ]
       end
@@ -87,7 +87,7 @@ class HistoryRequestHandler
 
   def find_previous_version(current, versions)
     prev = 0
-    versions.values.map{|v| v[:lock_version]}.each do |v|
+    versions.values.map{|v| v[:revision]}.each do |v|
       prev = v if v < current && v > prev
     end
 

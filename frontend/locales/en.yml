@@ -4,6 +4,7 @@ en:
       field:
         record_id: Id
         model: Model
+        revision: Revision
         lock_version: Version
         created_by: Created by
         last_modified_by: Updated by

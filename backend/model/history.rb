@@ -36,6 +36,7 @@ class History < Sequel::Model(:history)
       [
        :record_id,
        :model,
+       :revision,
        :lock_version,
        :uri,
        :label,
@@ -52,6 +53,7 @@ class History < Sequel::Model(:history)
     @diff_skip_fields ||=
       [
        :jsonmodel_type,
+       :revision,
        :lock_version,
        :created_by,
        :last_modified_by,
@@ -165,7 +167,7 @@ class History < Sequel::Model(:history)
       .filter(:b__lock_version => nil)
       .filter(:history__model => objs.first.class.table_name.to_s)
       .filter(:history__record_id => objs.map{|o| o.id})
-      .select_hash(:history__record_id, [:history__lock_version, :history__digest])
+      .select_hash(:history__record_id, [:history__lock_version, :history__digest, :history__revision])
 
     jsons.zip(objs).each do |json, obj|
       if !latest_versions[obj.id] || (latest_versions[obj.id][0] < obj.lock_version && latest_versions[obj.id][1] != digest_json(json))
@@ -173,6 +175,7 @@ class History < Sequel::Model(:history)
         hist = {
           :record_id => obj.id,
           :model => obj.class.table_name.to_s,
+          :revision => latest_versions.fetch(obj.id, [0,0,0])[2] + 1,
           :lock_version => obj.lock_version,
           :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
           :uri => json[:uri],
@@ -217,7 +220,8 @@ class History < Sequel::Model(:history)
     hist = {
       :record_id => obj.id,
       :model => obj.class.table_name.to_s,
-      :lock_version => latest_version.version + 1,
+      :revision => latest_version.version + 1,
+      :lock_version => latest_version.lock_version + 1,
       :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
       :uri => obj.class.my_jsonmodel(true).uri_for(obj.id, uri_hash),
       :label => label,
@@ -249,7 +253,7 @@ class History < Sequel::Model(:history)
     @stat_counter ||= StatCounter.new(60)
 
     SystemStatus.update('Last History Update', :good,
-                        "#{hist[:model]} / #{hist[:record_id]} .v#{hist[:lock_version]} by #{hist[:last_modified_by]} -- #{hist[:label]}")
+                        "#{hist[:model]} / #{hist[:record_id]} .v#{hist[:revision]} by #{hist[:last_modified_by]} -- #{hist[:label]}")
 
     unless @stat_counter.add
       SystemStatus.update('History Updates', 60 * @stat_counter.count / @stat_counter.sample_time < 10  ? :good : :busy,
@@ -277,8 +281,8 @@ class History < Sequel::Model(:history)
 
 
   def self.uri_for_uri_at(time, uri)
-    version = db[:history].filter(:uri => uri).where{user_mtime <= time}.reverse(:lock_version).first
-    version ? uri(version[:model], version[:record_id], version[:lock_version]) : uri
+    version = db[:history].filter(:uri => uri).where{user_mtime <= time}.reverse(:revision).first
+    version ? uri(version[:model], version[:record_id], version[:revision]) : uri
   end
 
 
@@ -303,7 +307,7 @@ class History < Sequel::Model(:history)
       ds = ds.where{user_mtime <= time}
     end
 
-    ds = ds.where{lock_version <= filters[:version]} if filters.has_key?(:version)
+    ds = ds.where{revision <= filters[:version]} if filters.has_key?(:version)
     ds
   end
 
@@ -337,7 +341,7 @@ class History < Sequel::Model(:history)
 
     raise VersionNotFound.new if ds.empty?
 
-    Hash[ds.all.map{|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
+    Hash[ds.all.map{|r| [History.uri(r[:model], r[:record_id], r[:revision]), Version.from_row(r)]}]
   end
 
 
@@ -408,12 +412,12 @@ class History < Sequel::Model(:history)
 
   def versions(filters = {})
     my_ds = History.apply_filters(ds, filters)
-                   .reverse(:lock_version)
+                   .reverse(:revision)
                    .select(*History.fields.reject{|f| f == :json})
 
     raise VersionNotFound.new if my_ds.empty?
 
-    Hash[my_ds.all.map {|r| [History.uri(r[:model], r[:record_id], r[:lock_version]), Version.from_row(r)]}]
+    Hash[my_ds.all.map {|r| [History.uri(r[:model], r[:record_id], r[:revision]), Version.from_row(r)]}]
   end
 
 
@@ -422,7 +426,7 @@ class History < Sequel::Model(:history)
   end
 
 
-  def diff(a, b, convert_uris)
+  def diff(a, b, convert_uris = false)
     diffs = {:_changes => {}, :_adds => {}, :_removes => {}}
     return diffs if a == b
 
@@ -642,22 +646,26 @@ class History < Sequel::Model(:history)
     def initialize(history, vers = nil)
       @history = history
       if vers.is_a?(Integer)
-        @data = _version_or_die(@history.ds.filter(:lock_version => vers))
+        @data = _version_or_die(@history.ds.filter(:revision => vers))
       elsif vers.is_a?(String)
         @time = n_time = History.normalize_time(vers)
-        @data = _version_or_die(@history.ds.where{user_mtime <= n_time}.reverse(:lock_version))
+        @data = _version_or_die(@history.ds.where{user_mtime <= n_time}.reverse(:revision))
       else
-        @data = _version_or_die(@history.ds.reverse(:lock_version))
+        @data = _version_or_die(@history.ds.reverse(:revision))
       end
     end
 
 
     def data
-      {History.uri(@data[:model], @data[:record_id], @data[:lock_version]) => @data.reject{|f| f == :json}}
+      {History.uri(@data[:model], @data[:record_id], @data[:revision]) => @data.reject{|f| f == :json}}
     end
 
 
     def version
+      @data[:revision]
+    end
+
+    def lock_version
       @data[:lock_version]
     end
 
