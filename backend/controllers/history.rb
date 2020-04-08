@@ -40,7 +40,7 @@ class ArchivesSpaceService < Sinatra::Base
   Endpoint.get('/history')
   .description("Get recently created versions")
   .params(*COMMON_PARAMS,
-          ["limit", Integer, "How many to show", :default => 10],
+          ["limit", Integer, "How many to show", :default => 20],
           ["mode", String, "What data to return - list, json, data, full", :default => 'list'])
   .permissions([])
   .returns([200, "versions"]) \
@@ -59,7 +59,7 @@ class ArchivesSpaceService < Sinatra::Base
   .description("Get versions of records of the model")
   .params(*COMMON_PARAMS,
           ["model", String, "The model"],
-          ["limit", Integer, "How many to show", :default => 10],
+          ["limit", Integer, "How many to show", :default => 20],
           ["mode", String, "What data to return - list, json, data, full", :default => 'list'])
   .permissions([])
   .returns([200, "history"]) \
