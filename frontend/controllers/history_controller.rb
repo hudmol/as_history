@@ -132,6 +132,7 @@ class HistoryController < ApplicationController
   def clean_for_render(json, top)
     json.reject{|k,v| skip_fields.include?(k)}
         .reject{|k,v| v.is_a?(Array) && v.empty?}
+        .reject{|k,v| (d = get_diff(v)) && d.all?{|dv| dv.nil? || (dv.is_a?(Array) && dv.empty?)} }
         .reject{|k,v| (['repository', 'parent'].include?(k) && !top)}
         .sort_by{|k,v| (@@top_fields.index(k) || 9999) }
   end
