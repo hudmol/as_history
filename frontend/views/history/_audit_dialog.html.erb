@@ -1,13 +1,19 @@
 <div id="as-history-audit-dialog">
   <h4><%= t('plugins.history.audit.title') %> .v<%= data['revision'] %></h4>
 
-  <% data.reject{|k,v| ['label', 'short_label', 'repo_id'].include?(k)}.each do |k,v| %>
-    <div class="history-audit-field">
-      <span class="history-field-label">
-        <%= t('plugins.history.field.' + k) %>
-      </span>:
-      <%= v %>
-    </div>
+  <% ['model', 'record_id', 'revision', false,
+      'created_by', 'create_time', 'last_modified_by', 'user_mtime', 'system_mtime', false,
+      'uri', 'lock_version', 'suppressed', 'digest', 'system_version'].each do |k| %>
+    <% if k %>
+      <div class="history-audit-field">
+        <span class="history-field-label">
+          <%= t('plugins.history.field.' + k) %>
+        </span>:
+        <%= data[k] %>
+      </div>
+    <% else %>
+      <hr/>
+    <% end %>
   <% end %>
 
   <div class="pull-right as-history-dialog-buttons">

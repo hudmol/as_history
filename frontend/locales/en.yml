@@ -2,15 +2,15 @@ en:
   plugins:
     history:
       field:
-        record_id: Id
+        record_id: Record Id
         model: Model
         revision: Revision
         lock_version: Lock Version
         created_by: Created by
         last_modified_by: Updated by
         create_time: Created at
-        system_mtime: Last system update
-        user_mtime: Last user update
+        system_mtime: System updated at
+        user_mtime: User updated at
         uri: URI
         system_version: System
       title: History
