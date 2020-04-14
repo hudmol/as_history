@@ -57,7 +57,7 @@
   link_hash[:agent_type] = data['model'] if model_pl == 'agents'
 
   if data['model'] == 'archival_object' && json.has_key?('resource')
-    link_hash[:id] = json['resource']['ref'].split('/')[-2]
+    link_hash[:id] = json['resource']['ref'].split('/').last
     link_hash[:anchor] = "tree::archival_object_#{data['record_id']}"
   end
 %>
