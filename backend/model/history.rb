@@ -360,7 +360,7 @@ class History < Sequel::Model(:history)
 
   def self.restore_version!(model, record_id, version_id)
     record_model = ASModel.all_models.select {|m| m.table_name == model.intern}.first
-    json = JSONModel::JSONModel(model.intern).from_hash(History.version(model, record_id, version_id).json(false))
+    json = JSONModel::JSONModel(model.intern).from_hash(History.version(model, record_id, version_id).json(false), true, :trusted)
 
     reference = JSONModel.parse_reference(json.uri)
 
