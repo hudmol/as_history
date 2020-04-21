@@ -384,6 +384,9 @@ class History < Sequel::Model(:history)
       # a restoring deleted record
       obj = model.create_from_json(json, {:lock_version => json.lock_version + 1})
 
+      # bring the previous incarnation's history along with us
+      db[:history].filter(:model => model.table_name.to_s, :record_id => id).update(:record_id => obj.id)
+
       # this retains the old id, but at what cost?!
 #       begin
 #         restricted_model = model.restrict_primary_key?
