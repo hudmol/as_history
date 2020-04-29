@@ -382,7 +382,7 @@ class History < Sequel::Model(:history)
       obj.update_from_json(json)
     rescue NotFoundException
       # a restoring deleted record
-      obj = model.create_from_json(json, {:lock_version => json.lock_version + 1})
+      obj = model.create_from_json(json, {:lock_version => json.lock_version + 2})
 
       # bring the previous incarnation's history along with us
       db[:history].filter(:model => model.table_name.to_s, :record_id => id).update(:record_id => obj.id)
