@@ -60,7 +60,7 @@
         <%= render_aspace_partial :partial => "history/record", :locals => {:json => @version['inline_diff']} %>
 
         <div class="history-raw-view">
-          <pre><%= json.pretty_inspect %></pre>
+          <pre><%= JSON.pretty_generate(json) %></pre>
         </div>
       </div>
 
