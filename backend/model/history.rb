@@ -375,11 +375,32 @@ class History < Sequel::Model(:history)
   end
 
 
+  def self._lock_versions_for_uris!(json)
+    return unless json.respond_to?(:data) || json.is_a?(Hash)
+
+    if json.has_key?('uri')
+      ref = JSONModel.parse_reference(json['uri'])
+      json['lock_version'] = db[ref[:type].intern].filter(:id => ref[:id]).get(:lock_version)
+    end
+
+    (json.is_a?(Hash) ? json : json.data).each do |k,v|
+      if v.is_a?(Hash)
+        _lock_versions_for_uris!(v)
+      elsif v.is_a?(Array)
+        v.each do |h|
+          _lock_versions_for_uris!(h)
+        end
+      end
+    end
+
+    json
+  end
+
+
   def self._handle_restore(model, id, json)
     begin
       obj = model.get_or_die(id)
-      json.lock_version = obj.lock_version
-      obj.update_from_json(json)
+      obj.update_from_json(_lock_versions_for_uris!(json))
     rescue NotFoundException
       # a restoring deleted record
       obj = model.create_from_json(json, {:lock_version => json.lock_version + 2})
