@@ -378,9 +378,11 @@ class History < Sequel::Model(:history)
   def self._lock_versions_for_uris!(json)
     return unless json.respond_to?(:data) || json.is_a?(Hash)
 
-    if json.has_key?('uri')
+    if json.has_key?('uri') && json.has_key?('lock_version')
       ref = JSONModel.parse_reference(json['uri'])
-      json['lock_version'] = db[ref[:type].intern].filter(:id => ref[:id]).get(:lock_version)
+      if ref && ref[:type] == json['jsonmodel_type']
+        json['lock_version'] = db[ref[:type].intern].filter(:id => ref[:id]).get(:lock_version)
+      end
     end
 
     (json.is_a?(Hash) ? json : json.data).each do |k,v|
