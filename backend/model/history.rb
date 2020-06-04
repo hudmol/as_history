@@ -517,7 +517,16 @@ class History < Sequel::Model(:history)
     (from_json, to_json) = diff_versions_json(a, b, convert_uris)
 
     if from_json && to_json
-      inline_hash_diff(from_json, to_json)
+      begin
+        inline_hash_diff(from_json, to_json)
+      rescue
+        # The diff routine can be confused if there are significant schema
+        # changes between the versions being compared. In these rare
+        # circumstances, just give the caller the to_json and log a warning.
+        Log.warn('Diff failed for versions %d and %d' % [a, b])
+        Log.exception($!)
+        to_json
+      end
     else
       [from_json, to_json].compact.first
     end
