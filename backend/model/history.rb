@@ -548,15 +548,13 @@ class History < Sequel::Model(:history)
   def inline_hash_diff(a, b)
     out = {}
     zip_align(without_audit(a).keys, without_audit(b).keys).each do |a_key, b_key|
-      the_key = a_key || b_key
-
       if a_key && b_key
         if a[a_key].is_a? Hash
           out[a_key] = inline_hash_diff(a[a_key], b[b_key])
         elsif a[a_key].is_a? Array
           aa = a[a_key] + (Array.new([b[b_key].length - a[a_key].length, 0].max))
+          out[a_key] = []
           aa.zip(b[b_key]).each do |av, bv|
-            out[a_key] ||= []
             if av && bv
               if av.is_a? Hash
                 out[a_key].push(inline_hash_diff(av, bv))
@@ -621,12 +619,10 @@ class History < Sequel::Model(:history)
 
     (ax..a.length-1).each do |ix|
       out.push([a[ix], nil])
-      ax += 1
     end
 
     (bx..b.length-1).each do |ix|
       out.push([nil, b[ix]])
-      bx += 1
     end
 
     out
