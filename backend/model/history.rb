@@ -165,7 +165,7 @@ class History < Sequel::Model(:history)
          Sequel.qualify(lj, :lock_version) < Sequel.qualify(j, :lock_version)
        }
       .filter(:b__lock_version => nil)
-      .filter(:history__model => objs.first.class.table_name.to_s)
+      .filter(:history__model => objs.first.history_model)
       .filter(:history__record_id => objs.map{|o| o.id})
       .select_hash(:history__record_id, [:history__lock_version, :history__digest, :history__revision])
 
@@ -176,7 +176,7 @@ class History < Sequel::Model(:history)
       if !latest_versions[obj.id] || (latest_versions[obj.id][0] < obj.lock_version && latest_versions[obj.id][1] != digest)
         hist = {
           :record_id => obj.id,
-          :model => obj.class.table_name.to_s,
+          :model => obj.history_model,
           :revision => latest_versions.fetch(obj.id, [0,0,0])[2] + 1,
           :lock_version => obj.lock_version,
           :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
@@ -200,7 +200,7 @@ class History < Sequel::Model(:history)
 
   def self.map_field(obj, field)
     val = model_map[obj.class].has_key?(field) ? model_map[obj.class][field] : field
-    
+
     if val.is_a?(Proc)
       val.call(obj)
     else
@@ -215,13 +215,13 @@ class History < Sequel::Model(:history)
     # deletion does not respect lock_version, so we can't trust `obj`
     # to have the current lock_version. so we ask history to just
     # give us the latest version
-    latest_version = History.new(obj.class.table_name.to_s, obj.id).version
+    latest_version = History.new(obj.history_model, obj.id).version
     label = label_for(latest_version.json)
     json = {:deleted => true}
 
     hist = {
       :record_id => obj.id,
-      :model => obj.class.table_name.to_s,
+      :model => obj.history_model,
       :revision => latest_version.version + 1,
       :lock_version => latest_version.lock_version + 1,
       :repo_id => obj.respond_to?(:repo_id) ? obj.repo_id : 0,
@@ -243,7 +243,7 @@ class History < Sequel::Model(:history)
 
   def self.handle_suppression(model, ids, val)
     if models.include?(model)
-      db[:history].filter(:model => model.table_name.to_s)
+      db[:history].filter(:model => model.history_model)
         .filter(:record_id => ids)
         .update(:suppressed => val ? 1 : 0)
     end
@@ -268,7 +268,7 @@ class History < Sequel::Model(:history)
 
 
   def self.uri_for(obj, version = nil)
-    uri(obj.class.table_name.to_s, obj.id, version)
+    uri(obj.history_model, obj.id, version)
   end
 
 
@@ -359,7 +359,7 @@ class History < Sequel::Model(:history)
 
 
   def self.restore_version!(model, record_id, version_id)
-    record_model = ASModel.all_models.select {|m| m.table_name == model.intern}.first
+    record_model = ASModel.all_models.select {|m| m.respond_to?(:history_model) && m.history_model == model}.first
     json = JSONModel::JSONModel(model.intern).from_hash(History.version(model, record_id, version_id).json(false), true, :trusted)
 
     reference = JSONModel.parse_reference(json.uri)
@@ -408,7 +408,7 @@ class History < Sequel::Model(:history)
       obj = model.create_from_json(json, {:lock_version => json.lock_version + 2})
 
       # bring the previous incarnation's history along with us
-      db[:history].filter(:model => model.table_name.to_s, :record_id => id).update(:record_id => obj.id)
+      db[:history].filter(:model => model.history_model, :record_id => id).update(:record_id => obj.id)
 
       # this retains the old id, but at what cost?!
 #       begin

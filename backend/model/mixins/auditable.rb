@@ -13,7 +13,7 @@ module Auditable
     # be a version for the latest state of the record
     # so let's make sure it's there before we delete
     begin
-      version = History.new(self.class.table_name.to_s, self.id).version
+      version = History.new(self.history_model, self.id).version
       raise History::VersionNotFound.new if version.lock_version != self.lock_version
     rescue History::VersionNotFound
       # the version will be created when we get the record
@@ -39,6 +39,11 @@ module Auditable
   end
 
 
+  def history_model
+    self.class.history_model
+  end
+
+
   module ClassMethods
     def sequel_to_jsonmodel(objs, opts = {})
       jsons = super
@@ -52,6 +57,11 @@ module Auditable
       end
 
       jsons
+    end
+
+
+    def history_model
+      my_jsonmodel.record_type.to_s
     end
   end
 end
