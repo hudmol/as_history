@@ -6,6 +6,28 @@
 
 <%= javascript_include_tag 'history_in_a_rush' %>
 
+
+<%# BEGIN REMOVE WHEN AS VERSION INCLUDES #current_record and _sidebar_footer.html.erb %>
+<% if controller.action_name == 'show' && !self.methods.include?(:current_record) %>
+  <% current_record = self.instance_variables
+                          .map{|v| self.instance_variable_get(v) }
+                          .find{|v| v.respond_to?(:history) && v.history.is_a?(Hash) && v.history['ref']} %>
+
+  <% if current_record %>
+    <script type="text/template" id="historySidebarTemplate">
+      <%= render partial: '/sidebar_footer', :locals => {:current_record => current_record} %>
+    </script>
+
+    <script>
+      $(function() {
+          $('#archivesSpaceSidebar .nav').append($(AS.renderTemplate("historySidebarTemplate")));
+      });
+    </script>
+  <% end %>
+<% end %>
+<%# END REMOVE WHEN AS VERSION INCLUDES #current_record and _sidebar_footer.html.erb %>
+
+
 <script type="text/template" id="historyAllButtonTemplate">
   <%= link_to I18n.t("plugins.history.all_menu_button_label"), {:controller => :history, :action => :index, :model => nil} %>
 </script>
