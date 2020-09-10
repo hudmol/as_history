@@ -92,3 +92,22 @@ end
 
 # determine system version
 History.ensure_system_version
+
+
+# REMOVE THIS WHEN AS HAS RESTHelpers::Endpoint#permissions_for
+unless RESTHelpers::Endpoint.methods.include?(:permissions_for)
+  RESTHelpers::Endpoint.class_eval do
+    def self.permissions_for(method, uri)
+      uri_re = Regexp.new(uri.gsub(/\d+/, ':[a-z_]+'))
+      endpoint = self.class_variable_get(:@@endpoints).select{|ep| ep[:uri] =~ uri_re && ep[:methods].include?(method)}.first
+      endpoint[:permissions] if endpoint
+    end
+
+    alias :permissions_orig :permissions
+    def permissions(permissions)
+      @permissions = permissions
+      permissions_orig(permissions)
+    end
+  end
+end
+
