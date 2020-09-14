@@ -20,7 +20,18 @@
 
     <script>
       $(function() {
+        $('#archivesSpaceSidebar .nav').append($(AS.renderTemplate("historySidebarTemplate")));
+
+        $(document).on('loadedrecordform.aspace', function(event, $container) {
           $('#archivesSpaceSidebar .nav').append($(AS.renderTemplate("historySidebarTemplate")));
+
+          if (document.location.hash.startsWith('#tree')) {
+            var uri = document.location.hash.split('::')[1];
+            uri = uri.replace(/_(\d)/, '\/$1');
+            uri = '/history/' + uri;
+            $('#as-history-button').attr('href', uri);
+          }
+        });
       });
     </script>
   <% end %>
