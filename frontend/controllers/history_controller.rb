@@ -166,6 +166,8 @@ class HistoryController < ApplicationController
       'agents'
     elsif model == 'archival_object'
       'resources'
+    elsif model == 'digital_object_component'
+      'digital_objects'
     else
       model.pluralize
     end

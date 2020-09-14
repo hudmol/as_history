@@ -60,6 +60,11 @@
     link_hash[:id] = json['resource']['ref'].split('/').last
     link_hash[:anchor] = "tree::archival_object_#{data['record_id']}"
   end
+
+  if data['model'] == 'digital_object_component' && json.has_key?('digital_object')
+    link_hash[:id] = json['digital_object']['ref'].split('/').last
+    link_hash[:anchor] = "tree::digital_object_component_#{data['record_id']}"
+  end
 %>
 
 <div class="btn-group">
