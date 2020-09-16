@@ -229,7 +229,13 @@ class HistoryController < ApplicationController
       end
     end
 
-    enum_name ||= [type, field].join('_')
+    unless enum_name
+      if JSONModel.models.find{|m| m[0] == type}
+        enum_name = JSONModel(type.intern).schema['properties'].fetch(field, {})['dynamic_enum']
+      end
+
+      enum_name ||= [type, field].join('_')
+    end
 
     I18n.t("enumerations.#{enum_name}.#{value}", :default => I18n.t("enumerations.#{field}.#{value}", :default => value))
   end
