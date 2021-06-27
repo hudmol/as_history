@@ -86,7 +86,7 @@ class AppConfig
            else
              [k, v]
            end
-         }.sort].to_s.gsub(/\#<Proc:[^>]+>/, 'Proc'))
+         }].sort_by{|k,v| k.to_s}.to_h.to_s.gsub(/\#<Proc:[^>]+>/, 'Proc'))
   end
 end
 
