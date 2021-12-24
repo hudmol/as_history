@@ -5,6 +5,7 @@ class ArchivesSpaceService < Sinatra::Base
      ["user",  String,       "Only show updates by user", :optional => true],
      ["at",    String,       "Only show updates at or before the specified date/time", :optional => true],
      ["uris",  BooleanParam, "Convert uris to historical equivalents", :default => true],
+     ["array", BooleanParam, "Convert the list hash to an array", :default => false],
     ]
 
   Endpoint.get('/history/models')

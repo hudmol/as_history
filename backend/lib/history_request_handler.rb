@@ -1,6 +1,6 @@
 class HistoryRequestHandler
 
-  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :admin, :permissions, :scope
+  attr_accessor :mode, :user, :time, :convert_uris, :diff, :limit, :array, :admin, :permissions, :scope
 
   def initialize(current_user, opts = {})
     self.mode =         opts[:mode]  # what data to show
@@ -9,6 +9,7 @@ class HistoryRequestHandler
     self.convert_uris = opts[:uris]  # convert uris to history equivalents
     self.diff =         opts[:diff]  # the version to diff against
     self.limit =        opts[:limit] # limit the number of versions to show
+    self.array =        opts[:array] # convert the list (hash) to an array
 
     self.admin = current_user.can?(:administer_system)
     # the anonymous user, strangely, doesn't respond to permissions
@@ -57,6 +58,10 @@ class HistoryRequestHandler
          versions
         ]
       end
+
+    if array
+      list = list.map{|uri, obj| {:ref => uri, :_resolved => obj}}
+    end
 
     case mode
     when nil || /^l/ # list
