@@ -292,8 +292,8 @@ class History < Sequel::Model(:history)
   def self.apply_scope(dataset, filters)
     ds = dataset
     if filters.has_key?(:scope)
-      ds = ds.where{{:suppressed => 0} | {1 => filters[:scope][:view_suppressed]} | {:repo_id => filters[:scope][:view_suppressed]}}
-      ds = ds.where{{:repo_id => 0} | {1 => filters[:scope][:view_repository]} | {:repo_id => filters[:scope][:view_repository]}}
+      ds = ds.where{{:suppressed => 0} | {Repository.global_repo_id => filters[:scope][:view_suppressed]} | {:repo_id => filters[:scope][:view_suppressed]}}
+      ds = ds.where{{:repo_id => 0} | {Repository.global_repo_id => filters[:scope][:view_repository]} | {:repo_id => filters[:scope][:view_repository]}}
     end
     ds
   end
