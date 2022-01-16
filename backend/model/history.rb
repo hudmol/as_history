@@ -108,7 +108,7 @@ class History < Sequel::Model(:history)
           :config => ASUtils.to_json(config),
         }
         db[:history_system_version].insert(sys_version)
-        
+
         SystemVersion.new
       end
   end
@@ -135,6 +135,11 @@ class History < Sequel::Model(:history)
       .reverse(:first_seen)
       .select(*SystemVersion.fields.reject{|f| f == :config})
       .all.map{|r| SystemVersion.from_row(r)}
+  end
+
+
+  def self.editors
+    db[:history].select(:last_modified_by).distinct.map{|u| u[:last_modified_by]}
   end
 
 

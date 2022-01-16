@@ -18,6 +18,16 @@ class ArchivesSpaceService < Sinatra::Base
   end
 
 
+  Endpoint.get('/history/editors')
+  .description("Get a list of users who have created versions")
+  .params()
+  .permissions([:administer_system])
+  .returns([200, "(usernames)"]) \
+  do
+    json_response(History.editors)
+  end
+
+
   Endpoint.get('/history/system_versions')
   .description("Get a list of system versions")
   .params()
