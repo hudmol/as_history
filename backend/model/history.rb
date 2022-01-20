@@ -139,7 +139,7 @@ class History < Sequel::Model(:history)
 
 
   def self.editors
-    db[:history].select(:last_modified_by).distinct.map{|u| u[:last_modified_by]}
+    db[:history].select(:last_modified_by).distinct.map{|u| u[:last_modified_by]}.compact
   end
 
 
