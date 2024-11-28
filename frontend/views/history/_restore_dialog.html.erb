@@ -24,12 +24,12 @@
         <% if params[:version] && params[:version] != current_version.to_s %>
           <a class="btn btn-primary as-history-tb-submit-restore-button"
             href="<%= history_uri(params[:model], params[:id], nil, {:restore => params[:version]})  %>">
-            <%= t('plugins.history.restore.submit_button_label', {:version => params[:version]}) %>
+            <%= t('plugins.history.restore.submit_button_label', :version => params[:version]) %>
           </a>
         <% elsif diff_version %>
           <a class="btn btn-primary as-history-tb-submit-restore-button"
             href="<%= history_uri(params[:model], params[:id], nil, {:restore => diff_version})  %>">
-            <%= t('plugins.history.restore.submit_button_label', {:version => diff_version}) %>
+            <%= t('plugins.history.restore.submit_button_label', :version => diff_version) %>
           </a>
         <% end %>
       <% end %>

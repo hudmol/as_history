@@ -4,40 +4,7 @@
  var HISTORY_IN_A_RUSH_TRANSLATIONS = <%== ASUtils.to_json(I18n.backend.send(:translations)[I18n.locale][:plugins][:history][:in_a_rush]) %>;
 </script>
 
-<%= javascript_include_tag 'history_in_a_rush' %>
-
-
-<%# BEGIN REMOVE WHEN AS VERSION INCLUDES #current_record and _sidebar_footer.html.erb %>
-<% if controller.action_name == 'show' && !self.methods.include?(:current_record) %>
-  <% current_record = self.instance_variables
-                          .map{|v| self.instance_variable_get(v) }
-                          .find{|v| v.respond_to?(:history) && v.history.is_a?(Hash) && v.history['ref']} %>
-
-  <% if current_record %>
-    <script type="text/template" id="historySidebarTemplate">
-      <%= render partial: '/sidebar_footer', :locals => {:current_record => current_record} %>
-    </script>
-
-    <script>
-      $(function() {
-        $('#archivesSpaceSidebar .nav').append($(AS.renderTemplate("historySidebarTemplate")));
-
-        $(document).on('loadedrecordform.aspace', function(event, $container) {
-          $('#archivesSpaceSidebar .nav').append($(AS.renderTemplate("historySidebarTemplate")));
-
-          if (document.location.hash.startsWith('#tree')) {
-            var uri = document.location.hash.split('::')[1];
-            uri = uri.replace(/_(\d)/, '\/$1');
-            uri = '/history/' + uri;
-            $('#as-history-button').attr('href', uri);
-          }
-        });
-      });
-    </script>
-  <% end %>
-<% end %>
-<%# END REMOVE WHEN AS VERSION INCLUDES #current_record and _sidebar_footer.html.erb %>
-
+<%= javascript_include_tag "#{@base_url}/assets/history_in_a_rush.js" %>
 
 <script type="text/template" id="historyAllButtonTemplate">
   <%= link_to I18n.t("plugins.history.all_menu_button_label"), {:controller => :history, :action => :index, :model => nil} %>
@@ -66,7 +33,8 @@
 
 
 <% if session[:user] && controller.controller_name == 'history' %>
-  <%= javascript_include_tag 'history' %>
+  <%= javascript_include_tag "#{@base_url}/assets/history.js" %>
+
   <script>
 
     $(function() {
