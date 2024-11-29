@@ -23,7 +23,7 @@
             ver['revision'] != diff_version &&
             ver['revision'] < data['revision'] %>
         <a class="btn btn-default as-history-sb-diff-button"
-           title="<%= t('plugins.history.diff_from_version', {:version => ver['revision']}) %>"
+           title="<%= t('plugins.history.diff_from_version', :version => ver['revision']) %>"
            href="<%= history_uri(params[:model], params[:id], (params[:version] || data['revision']), {:diff => ver['revision']}) %>">
           <span class="glyphicon glyphicon-arrow-up"></span>
         </a>
