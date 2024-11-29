@@ -7,18 +7,18 @@
 <%= javascript_include_tag "#{@base_url}/assets/history_in_a_rush.js" %>
 
 <script type="text/template" id="historyAllButtonTemplate">
-  <%= link_to I18n.t("plugins.history.all_menu_button_label"), {:controller => :history, :action => :index, :model => nil} %>
+  <%= link_to I18n.t("plugins.history.all_menu_button_label"), {:controller => :history, :action => :index, :model => nil}, {:class=>"dropdown-item"} %>
 </script>
 
 <script type="text/template" id="historyUserButtonTemplate">
-  <%= link_to I18n.t("plugins.history.user_menu_button_label"), {:controller => :history, :action => :index, :model => nil, :user => current_user} %>
+  <%= link_to I18n.t("plugins.history.user_menu_button_label"), {:controller => :history, :action => :index, :model => nil, :user => current_user}, {:class=>"dropdown-item"} %>
 </script>
 
 <script>
     // put links in the System menu
     $(function() {
       var setupButtons = function(all_templ, user_templ) {
-        $('.system-menu .dropdown-menu').append($('<li class="divider" />'));
+        $('.system-menu .dropdown-menu').append($('<li class="dropdown-divider" />'));
         $but = $(AS.renderTemplate(all_templ));
         $('.system-menu .dropdown-menu').append($('<li />').append($but));
         $but = $(AS.renderTemplate(user_templ));
