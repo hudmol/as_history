@@ -264,6 +264,7 @@
   padding-left: 12px;
   width: 65px;
   overflow: hidden;
+  float: left;
 }
 
 #as-history-tb-diff-raw-button {

@@ -3,7 +3,7 @@
   <%
     last_ver = false
     @version['versions'].each do |uri, ver|
-      mod_by = "<span class=\"history-sb-mod-by pull-left\" title=\"#{ver['last_modified_by']}\">#{ver['last_modified_by']}</span>"
+      mod_by = "<span class=\"history-sb-mod-by\" title=\"#{ver['last_modified_by']}\">#{ver['last_modified_by']}</span>"
       same_record_as_last = false
       showing = ver['model'] == data['model'] && ver['record_id'] == data['record_id'] && ver['revision'] == data['revision'] ? 'history-showing-version' : ''
       button_label = if last_ver && [ver['model'], ver['record_id']] === [last_ver['model'], last_ver['record_id']]
