@@ -7,6 +7,7 @@ An ArchivesSpace plugin that adds revision histories for major record types.
 Developed by Hudson Molonglo in collaboration with Gaia Resources as part of
 the Queensland State Archives Digital Archiving Program project.
 
+Compatible with ArchivesSpace v4.0.0.
 
 ## Overview
 
