@@ -2,7 +2,7 @@
   <li>
     <a class="btn btn-default"
        id="as-history-button"
-       href="<%= uri %>">
+       href="<%= File.join(AppConfig[:frontend_proxy_prefix], uri).to_s %>">
       <span class="glyphicon glyphicon-time"></span>
       <%= t('plugins.history.button_label') %>
       <span class="glyphicon glyphicon-chevron-right"></span>
