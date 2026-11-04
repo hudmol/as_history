@@ -1,59 +1,45 @@
 <div class=" history-browse-select-pane">
-
-
   <div class="history-select-label">
-
-      <a class="btn btn-default history-version-set history-version-set-button"
+    <a class="btn btn-default history-version-set history-version-set-button"
          title="Go to this version set"
-         href=" ">
-        <span class="glyphicon glyphicon-chevron-right"></span>
-        <span class="history-version-set-label"></span>
-      </a>
-
+         href="<%= "#{AppConfig[:frontend_proxy_prefix]}history" %>">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+      <span class="history-version-set-label"></span>
+    </a>
   </div>
-
   <div class="history-axis-select history-axis-model">
     <div>
       Model
     </div>
-
     <input type="checkbox" <%= 'checked' if params['model'] %>>
     <select name="model" class="form-control history-control" <%= 'disabled' unless params['model'] %>>
       <option value="_all">All models</option>
       <% supported_models.each do |model| %>
         <% selected = data['model'] == model[:model] ? 'selected' : '' %>
         <option value="<%= model[:model] %>" <%= selected %>><%= model[:label] %></option>
-      <% end %>
-    </select>
+    <% end %>
+  </select>
+</div>
+/
+<div class="history-axis-select history-axis-id">
+  <div>
+    ID
   </div>
-
-    /
-
-  <div class="history-axis-select history-axis-id">
-    <div>
-      ID
-    </div>
-
-    <input type="checkbox" <%= 'checked' if params['id'] %>>
-    <input name="id" class="form-control history-control" placeholder="All IDs" value="<%= data['record_id'] %>" <%= 'disabled' unless params['id'] %>>
+  <input type="checkbox" <%= 'checked' if params['id'] %>>
+  <input name="id" class="form-control history-control" placeholder="All IDs" value="<%= data['record_id'] %>" <%= 'disabled' unless params['id'] %>>
+</div>
+<div class="history-axis-select history-axis-user">
+  <div>
+    By user
   </div>
-
-  <div class="history-axis-select history-axis-user">
-    <div>
-      By user
-    </div>
-
-    <input type="checkbox" <%= 'checked' if params['user'] %>>
-    <input name="user" class="form-control history-control" placeholder="All users" value="<%= params['user'] || data['last_modified_by'] %>" <%= 'disabled' unless params['user'] %>>
+  <input type="checkbox" <%= 'checked' if params['user'] %>>
+  <input name="user" class="form-control history-control" placeholder="All users" value="<%= params['user'] || data['last_modified_by'] %>" <%= 'disabled' unless params['user'] %>>
+</div>
+<div class="history-axis-select history-axis-time">
+  <div>
+    At time
   </div>
-
-  <div class="history-axis-select history-axis-time">
-    <div>
-      At time
-    </div>
-
-    <input type="checkbox" <%= 'checked' if params['time'] %>>
-    <input name="time" class="form-control history-control" placeholder="Now" value="<%= params['time'] || data['user_mtime'] %>" <%= 'disabled' unless params['time'] %>>
-  </div>
-
+  <input type="checkbox" <%= 'checked' if params['time'] %>>
+  <input name="time" class="form-control history-control" placeholder="Now" value="<%= params['time'] || data['user_mtime'] %>" <%= 'disabled' unless params['time'] %>>
+</div>
 </div>
