@@ -33,6 +33,11 @@
 
 
 <% if session[:user] && controller.controller_name == 'history' %>
+
+  <script>
+    ASHISTORY_PROXY_PREFIX = '<%= AppConfig[:frontend_proxy_prefix] %>';
+  </script>
+
   <%= javascript_include_tag "#{@base_url}/assets/history.js" %>
 
   <script>

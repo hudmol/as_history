@@ -56,7 +56,7 @@
 
     ASHistory.prototype.updateBrowseButton = function() {
 	var label = '';
-        var uri = '/history';
+        var uri = ASHISTORY_PROXY_PREFIX + 'history';
 	var qs = {};
 	label = 'Recent updates';
         if (!$('select[name=model]').is(':disabled')) {
